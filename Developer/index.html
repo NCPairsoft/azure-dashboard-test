@@ -376,20 +376,7 @@
 </div>
 
 <script>
-/*
-  SQL reference you shared:
-  Server=INL-3CN8J8-PSFT\DEVELOPMENT;Database=AzureDashboard;User Id=AzUser;Password=AzUser@123;TrustServerCertificate=True;
 
-  Important:
-  A browser-only HTML file cannot open a SQL Server connection directly.
-  Keep this UI as-is and later replace fetchDashboardData() with a tiny .NET API such as:
-  GET /api/dashboard/developer?project=...&developer=...&sprint=...
-
-  Suggested aggregate SQL sources for your API:
-  - Teams + Iterations + Capacity for project/sprint/user filter lists and availability forecast
-  - WorkItems for delivered effort, velocity, work type mix, delayed/early delivery, quality indicators
-  - SyncControl for last sync timestamp
-*/
 
 const state = {
   demoMode: true,
