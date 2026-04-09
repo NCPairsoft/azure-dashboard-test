@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Azure DevOps Developer Performance Dashboard</title>
+  <style>
+    :root{
+      --bg1:#071126;
+      --bg2:#11153b;
+      --bg3:#102b3b;
+      --panel:rgba(19,24,52,.74);
+      --panel2:rgba(22,31,63,.72);
+      --border:rgba(255,255,255,.12);
+      --text:#eef2ff;
+      --muted:#a9b4d0;
+      --soft:#7f8ab2;
+      --cyan:#23c7f7;
+      --teal:#1fd3aa;
+      --purple:#6f63ff;
+      --orange:#ff8c1a;
+      --pink:#ff5ea8;
+      --red:#ff667a;
+      --green:#1fe08a;
+      --yellow:#ffd166;
+      --shadow:0 18px 40px rgba(0,0,0,.28);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 8% 10%, rgba(111,99,255,.24), transparent 24%),
+        radial-gradient(circle at 88% 12%, rgba(35,199,247,.20), transparent 26%),
+        radial-gradient(circle at 24% 85%, rgba(31,211,170,.14), transparent 22%),
+        linear-gradient(135deg,var(--bg2),var(--bg1) 42%, var(--bg3));
+      min-height:100vh;
+    }
+    .page{padding:16px;max-width:1800px;margin:0 auto}
+    .topbar{
+      display:grid;grid-template-columns:minmax(340px, 1.4fr) minmax(320px,1fr);gap:14px;align-items:stretch;margin-bottom:14px;
+    }
+    .brand,.status-bar,.panel,.chart-card,.table-card,.insight-card{
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      border-radius:var(--radius);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .brand{padding:14px 16px;display:flex;align-items:center;gap:14px;min-height:82px}
+    .logo{
+      width:42px;height:42px;border-radius:12px;
+      background:conic-gradient(from 220deg,var(--pink),var(--orange),var(--teal),var(--purple),var(--pink));
+      box-shadow:0 8px 22px rgba(111,99,255,.35);
+      position:relative;flex:0 0 auto;
+    }
+    .logo:after{content:"";position:absolute;inset:9px;border-radius:10px;background:rgba(255,255,255,.18);backdrop-filter:blur(8px)}
+    .brand h1{font-size:20px;margin:0 0 4px 0;letter-spacing:.2px}
+    .brand .sub{color:var(--muted);font-size:12px}
+    .status-bar{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .status-left{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+    .status-pill{padding:10px 14px;border-radius:18px;border:1px solid rgba(255,255,255,.09);background:rgba(9,16,35,.34)}
+    .status-pill b{display:block;font-size:12px;margin-bottom:2px}
+    .status-pill span{font-size:12px;color:var(--muted)}
+    .pulse{display:inline-flex;align-items:center;gap:9px}
+    .pulse i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(31,224,138,.55);animation:pulse 1.6s infinite}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(31,224,138,.6)}70%{box-shadow:0 0 0 12px rgba(31,224,138,0)}100%{box-shadow:0 0 0 0 rgba(31,224,138,0)}}
+    .toolbar{display:grid;grid-template-columns:1.3fr 1fr 1fr auto auto;gap:12px;margin-bottom:14px}
+    .panel{padding:14px}
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}
+    select,input,button{
+      width:100%;border:none;outline:none;color:var(--text);background:rgba(13,18,42,.58);
+      border:1px solid rgba(255,255,255,.10);border-radius:15px;padding:12px 14px;font-size:14px;
+    }
+    input::placeholder{color:#8892b5}
+    button{cursor:pointer;background:linear-gradient(90deg, rgba(103,92,255,.92), rgba(35,199,247,.86));font-weight:700;box-shadow:0 10px 20px rgba(35,199,247,.15)}
+    button.secondary{background:rgba(255,255,255,.06);box-shadow:none}
+    .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:14px}
+    .kpi{padding:16px;min-height:108px;position:relative;overflow:hidden}
+    .kpi:before{content:"";position:absolute;right:-20px;top:-20px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle, rgba(255,255,255,.16), transparent 65%)}
+    .kpi .label{font-size:12px;color:var(--muted);margin-bottom:10px}
+    .kpi .value{font-size:30px;font-weight:800;line-height:1}
+    .kpi .meta{margin-top:9px;font-size:12px;color:var(--soft)}
+    .delta.up{color:var(--green)} .delta.down{color:var(--red)} .delta.warn{color:var(--yellow)}
+    .layout{display:grid;grid-template-columns:1.55fr 1fr;gap:14px}
+    .left-stack,.right-stack{display:grid;gap:14px}
+    .chart-row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .chart-row-3{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:14px}
+    .chart-card,.table-card,.insight-card{padding:14px}
+    .card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px}
+    .card-title{font-size:18px;font-weight:800;margin:0 0 4px 0}
+    .card-sub{font-size:12px;color:var(--muted)}
+    .badge{font-size:12px;padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:var(--muted);white-space:nowrap}
+    .chart-wrap{height:270px;position:relative}
+    canvas{width:100%;height:100%}
+    .small-chart{height:220px}
+    .micro-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px;text-align:left;vertical-align:top}
+    th{font-size:12px;color:var(--muted);font-weight:700}
+    tbody tr:hover{background:rgba(255,255,255,.03)}
+    .rank-chip,.health-chip{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:700}
+    .rank-chip{background:rgba(111,99,255,.18);color:#d8d3ff}
+    .health-chip.good{background:rgba(31,224,138,.14);color:#8af0bf}
+    .health-chip.risk{background:rgba(255,102,122,.14);color:#ffb1bc}
+    .health-chip.warn{background:rgba(255,209,102,.14);color:#ffe19a}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .legend .item{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .insight-list{display:grid;gap:10px}
+    .insight{padding:12px 13px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+    .insight strong{display:block;font-size:13px;margin-bottom:4px}
+    .insight span{font-size:12px;color:var(--muted);line-height:1.45}
+    .footer-note{margin-top:14px;color:var(--soft);font-size:12px;text-align:right}
+    .hint{font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px}
+    .empty-banner{padding:11px 12px;border-radius:14px;background:rgba(255,209,102,.10);border:1px solid rgba(255,209,102,.18);color:#ffe6ad;font-size:12px;margin-bottom:14px}
+    @media (max-width:1400px){
+      .kpi-grid{grid-template-columns:repeat(3,1fr)}
+      .layout{grid-template-columns:1fr}
+    }
+    @media (max-width:1100px){
+      .toolbar{grid-template-columns:1fr 1fr}
+      .chart-row-2,.chart-row-3,.split,.micro-grid,.topbar{grid-template-columns:1fr}
+    }
+    @media (max-width:700px){
+      .kpi-grid{grid-template-columns:repeat(2,1fr)}
+      .page{padding:10px}
+      .brand h1{font-size:18px}
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <h1>Azure DevOps Developer Performance Dashboard</h1>
+        <div class="sub">Single-file concept UI · glassmorphism theme · project / sprint / developer driven view</div>
+      </div>
+    </div>
+    <div class="status-bar">
+      <div class="status-left">
+        <div class="status-pill">
+          <b class="pulse"><i></i><span id="modeText">Demo mode</span></b>
+          <span id="dbState">Browser cannot connect directly to SQL Server. Replace demo loader with your API later.</span>
+        </div>
+        <div class="status-pill"><b>Last Sync</b><span id="lastSync">-</span></div>
+        <div class="status-pill"><b>Current Sprint</b><span id="currentSprintText">-</span></div>
+      </div>
+      <div style="display:flex;gap:10px;min-width:220px;">
+        <button id="refreshBtn">Refresh</button>
+        <button id="toggleDemoBtn" class="secondary">Toggle Demo</button>
+      </div>
+    </div>
+  </div>
+  <!-- <div class="empty-banner"> -->
+    <!-- Your SQL connection string is noted in the source code comments for reference, but a browser-only HTML page cannot query SQL Server directly. This file is fully ready in single-page format with demo data and a clearly marked <b>fetchDashboardData()</b> stub so your team can plug in a lightweight .NET endpoint later without changing the UI. -->
+  <!-- </div> -->
+  <div class="toolbar panel">
+    <div>
+      <label>Project</label>
+      <select id="projectSelect"></select>
+    </div>
+    <div>
+      <label>Developer</label>
+      <select id="developerSelect"></select>
+    </div>
+    <div>
+      <label>Sprint</label>
+      <select id="sprintSelect"></select>
+    </div>
+    <div>
+      <label>Search work item / activity</label>
+      <input type="text" id="searchInput" placeholder="Story, task, bug, code review..." />
+    </div>
+    <div style="display:flex;align-items:end;gap:10px;">
+      <button id="clearBtn" class="secondary">Clear</button>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="panel kpi"><div class="label">Delivered vs Expected Effort</div><div class="value" id="kpiDelivery">0%</div><div class="meta" id="kpiDeliveryMeta">-</div></div>
+    <div class="panel kpi"><div class="label">Velocity vs Team Average</div><div class="value" id="kpiVelocity">0</div><div class="meta" id="kpiVelocityMeta">-</div></div>
+    <div class="panel kpi"><div class="label">Quality / Tech Debt Index</div><div class="value" id="kpiQuality">0</div><div class="meta" id="kpiQualityMeta">-</div></div>
+    <div class="panel kpi"><div class="label">Lead Time</div><div class="value" id="kpiLeadTime">0d</div><div class="meta" id="kpiLeadMeta">-</div></div>
+    <div class="panel kpi"><div class="label">Focus Ratio</div><div class="value" id="kpiFocus">0%</div><div class="meta" id="kpiFocusMeta">-</div></div>
+    <div class="panel kpi"><div class="label">Peer Rank</div><div class="value" id="kpiRank">#0</div><div class="meta" id="kpiRankMeta">-</div></div>
+  </div>
+
+  <div class="layout">
+    <div class="left-stack">
+      <div class="chart-row-2">
+        <div class="chart-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Expected vs Delivered Effort</div>
+              <div class="card-sub">Daily trend through sprint for selected developer or filtered group</div>
+            </div>
+            <div class="badge" id="effortBadge">Plan vs actual</div>
+          </div>
+          <div class="chart-wrap"><canvas id="effortTrendChart"></canvas></div>
+          <div class="legend">
+            <div class="item"><span class="dot" style="background:var(--purple)"></span>Expected burn</div>
+            <div class="item"><span class="dot" style="background:var(--cyan)"></span>Delivered burn</div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Velocity Comparison</div>
+              <div class="card-sub">Delivered velocity vs sprint average vs personal average</div>
+            </div>
+            <div class="badge" id="velocityBadge">Current sprint</div>
+          </div>
+          <div class="chart-wrap"><canvas id="velocityChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="chart-row-3">
+        <div class="chart-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Development Area vs Time Invested</div>
+              <div class="card-sub">Story / Bug / Task / Review / Support / Spike mix</div>
+            </div>
+            <div class="badge">Work mix</div>
+          </div>
+          <div class="chart-wrap small-chart"><canvas id="workMixChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Non-Development Activities</div>
+              <div class="card-sub">Meetings, support, KT, reviews, blockers</div>
+            </div>
+            <div class="badge">Activity monitor</div>
+          </div>
+          <div class="chart-wrap small-chart"><canvas id="nonDevChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Quality & Tech Debt Ratio</div>
+              <div class="card-sub">Bug effort, rework, review overhead, debt reduction</div>
+            </div>
+            <div class="badge">Health index</div>
+          </div>
+          <div class="chart-wrap small-chart"><canvas id="qualityChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="chart-row-2">
+        <div class="chart-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Lead Time, Deviation & Delivery Accuracy</div>
+              <div class="card-sub">Average lead time, delayed items, early delivery, estimate variance</div>
+            </div>
+            <div class="badge">Execution discipline</div>
+          </div>
+          <div class="chart-wrap"><canvas id="leadTimeChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Code Activity vs Work Items</div>
+              <div class="card-sub">Placeholder design for future Git commit integration</div>
+            </div>
+            <div class="badge">Future-ready</div>
+          </div>
+          <div class="chart-wrap"><canvas id="codeActivityChart"></canvas></div>
+          <div class="hint">At present your SQL dump does not contain commit linkage, so this section runs in conceptual mode only. Once commit-to-workitem data is available, the chart can directly compare commit churn, re-open churn, and commit count per story.</div>
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="table-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Availability in Next Few Days</div>
+              <div class="card-sub">Capacity, days off, forecast utilization</div>
+            </div>
+            <div class="badge" id="availabilityBadge">5 day window</div>
+          </div>
+          <table>
+            <thead><tr><th>Date</th><th>Capacity</th><th>Booked</th><th>Free</th><th>Status</th></tr></thead>
+            <tbody id="availabilityTable"></tbody>
+          </table>
+        </div>
+        <div class="table-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Current Work Item Snapshot</div>
+              <div class="card-sub">Filtered sprint backlog and execution status</div>
+            </div>
+            <div class="badge" id="wiBadge">Live slice</div>
+          </div>
+          <table>
+            <thead><tr><th>ID</th><th>Type</th><th>Title</th><th>State</th><th>Effort</th></tr></thead>
+            <tbody id="workItemsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-stack">
+      <div class="chart-card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Overall Performance vs Peers</div>
+            <div class="card-sub">How the selected developer compares with team members</div>
+          </div>
+          <div class="badge" id="peerBadge">Peer percentile</div>
+        </div>
+        <div class="chart-wrap"><canvas id="peerComparisonChart"></canvas></div>
+      </div>
+
+      <div class="micro-grid">
+        <div class="insight-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Quick Highlights</div>
+              <div class="card-sub">Auto narrative for developers</div>
+            </div>
+          </div>
+          <div class="insight-list" id="highlights"></div>
+        </div>
+        <div class="insight-card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Improvement Signals</div>
+              <div class="card-sub">Coach-ready observations</div>
+            </div>
+          </div>
+          <div class="insight-list" id="improvements"></div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Developer Leaderboard</div>
+            <div class="card-sub">Composite score across delivery, quality, predictability and focus</div>
+          </div>
+          <div class="badge">Ranked peers</div>
+        </div>
+        <table>
+          <thead><tr><th>Rank</th><th>Developer</th><th>Delivery</th><th>Quality</th><th>Focus</th><th>Score</th></tr></thead>
+          <tbody id="leaderboardTable"></tbody>
+        </table>
+      </div>
+
+      <div class="table-card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Delayed / Risky Deliverables</div>
+            <div class="card-sub">Items needing attention in sprint</div>
+          </div>
+          <div class="badge">Risk radar</div>
+        </div>
+        <table>
+          <thead><tr><th>ID</th><th>Developer</th><th>Title</th><th>Variance</th><th>Status</th></tr></thead>
+          <tbody id="riskTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">Prepared as a single self-contained HTML proof-of-concept for PairSoft Azure DevOps developer analytics.</div>
+</div>
+
+<script>
+/*
+  SQL reference you shared:
+  Server=INL-3CN8J8-PSFT\DEVELOPMENT;Database=AzureDashboard;User Id=AzUser;Password=AzUser@123;TrustServerCertificate=True;
+
+  Important:
+  A browser-only HTML file cannot open a SQL Server connection directly.
+  Keep this UI as-is and later replace fetchDashboardData() with a tiny .NET API such as:
+  GET /api/dashboard/developer?project=...&developer=...&sprint=...
+
+  Suggested aggregate SQL sources for your API:
+  - Teams + Iterations + Capacity for project/sprint/user filter lists and availability forecast
+  - WorkItems for delivered effort, velocity, work type mix, delayed/early delivery, quality indicators
+  - SyncControl for last sync timestamp
+*/
+
+const state = {
+  demoMode: true,
+  raw: null,
+  filtered: null,
+  charts: {},
+  filters: { project:'ALL', developer:'ALL', sprint:'CURRENT', search:'' }
+};
+
+const palette = {
+  purple:'#6f63ff', cyan:'#23c7f7', teal:'#1fd3aa', orange:'#ff8c1a', pink:'#ff5ea8', red:'#ff667a', green:'#1fe08a', yellow:'#ffd166', line:'#a9b4d0'
+};
+
+const el = id => document.getElementById(id);
+const fmt = n => Number(n || 0).toFixed(1).replace('.0','');
+const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
+const byId = {
+  project: el('projectSelect'), developer: el('developerSelect'), sprint: el('sprintSelect'), search: el('searchInput')
+};
+
+function daysBetween(a,b){
+  const ms = new Date(b) - new Date(a);
+  return Math.round(ms / (1000*60*60*24));
+}
+function sum(arr, selector){ return arr.reduce((a,x)=>a+(selector?selector(x):x),0); }
+function avg(arr, selector){ return arr.length ? sum(arr, selector)/arr.length : 0; }
+function unique(arr){ return [...new Set(arr.filter(Boolean))]; }
+function safeText(v){ return (v ?? '').toString(); }
+function short(str, len=44){ str=safeText(str); return str.length>len ? str.slice(0,len-1)+'…' : str; }
+function getCurrentDateISO(){ return new Date().toISOString().slice(0,10); }
+function isDoneState(state){ return ['done','closed','resolved','completed'].includes((state||'').toLowerCase()); }
+
+function optionize(select, items, current){
+  select.innerHTML = items.map(x => `<option value="${x.value}">${x.label}</option>`).join('');
+  select.value = current;
+}
+
+function demoDataset(){
+  const currentSprint = 'Sprint 28';
+  const previousSprint = 'Sprint 27';
+  const upcomingSprint = 'Sprint 29';
+  const projects = ['PaperSave','PairSoftPlatform','Webiplex'];
+  const devs = [
+    {name:'Komal Patel', project:'PaperSave', team:'PaperSave DevOps'},
+    {name:'Sami Pentolen', project:'PaperSave', team:'PaperSave DevOps'},
+    {name:'Sarah Spencer', project:'PairSoftPlatform', team:'WhiteOwl QA App-QA'},
+    {name:'Diego Rosa', project:'PairSoftPlatform', team:'Procurement Defect'},
+    {name:'Rutu Kalariya', project:'PaperSave', team:'PaperSave Agile'},
+    {name:'Jignesh Shah', project:'Webiplex', team:'Webiplex Team'}
+  ];
+
+  const sprints = [
+    {name:currentSprint, start:'2026-03-24', end:'2026-04-06'},
+    {name:previousSprint, start:'2026-03-10', end:'2026-03-23'},
+    {name:upcomingSprint, start:'2026-04-07', end:'2026-04-20'}
+  ];
+
+  const workTypes = ['User Story','Task','Bug','Code Review','Support','Spike'];
+  const states = ['New','Active','Resolved','Done','Closed'];
+  const workItems = [];
+  let wi = 200100;
+
+  function pushWI(dev, sprint, overrides={}){
+    const type = overrides.type || workTypes[Math.floor(Math.random()*workTypes.length)];
+    const story = type==='User Story' ? [3,5,8,13][Math.floor(Math.random()*4)] : 0;
+    const orig = overrides.orig ?? (type==='Task'||type==='Bug'||type==='Spike'||type==='Support'||type==='Code Review' ? (Math.floor(Math.random()*10)+2) : Math.floor(Math.random()*8)+2);
+    const completed = overrides.completed ?? clamp(orig + (Math.random()*6-2.5), 0, orig+6);
+    const remaining = Math.max(0, Math.round((orig-completed)*10)/10);
+    const changeOffset = Math.floor(Math.random()*10);
+    const changed = new Date(new Date(sprint.start).getTime()+changeOffset*86400000).toISOString();
+    const state = overrides.state || (completed >= orig ? (Math.random()>.4?'Done':'Closed') : (Math.random()>.5?'Active':'Resolved'));
+    workItems.push({
+      WorkItemId: wi++, ProjectName: dev.project, TeamName: dev.team, TeamId: dev.team, WorkItemType:type,
+      Title: overrides.title || `${type} - ${dev.project} ${Math.floor(Math.random()*90+10)}`,
+      State: state, AssignedTo: dev.name, IterationPath:`${dev.project}\\${sprint.name}`, SprintName:sprint.name,
+      StoryPoints: story, OriginalEstimate: orig, CompletedWork: Math.round(completed*10)/10,
+      RemainingWork: remaining, ChangedDate: changed,
+      LeadTimeDays: clamp(Math.round(orig/2 + Math.random()*6),1,14),
+      DeliveryVarianceHours: Math.round((completed-orig)*10)/10,
+      IsDelayed: completed > orig + 2,
+      IsEarly: completed < orig - 1 && isDoneState(state),
+      QualityIssueHours: type==='Bug' ? Math.round((orig*0.65)*10)/10 : Math.round((Math.random()*1.8)*10)/10,
+      TechDebtHours: Math.round((Math.random()*2.5)*10)/10,
+      Commits: Math.floor(Math.random()*9),
+      ReviewLoops: Math.floor(Math.random()*4),
+      Area: type,
+      ActivityGroup: ['Coding','Coding','Coding','Meetings','Support','Review','KT'][Math.floor(Math.random()*7)]
+    });
+  }
+
+  devs.forEach(dev => {
+    sprints.forEach(sp => {
+      const count = sp.name===currentSprint ? 7 : 6;
+      for(let i=0;i<count;i++) pushWI(dev, sp);
+    });
+  });
+
+  // Add a few deterministic items so dashboard feels meaningful
+  pushWI(devs[0], sprints[0], {type:'User Story', orig:18, completed:20, title:'PBI - Batch retention optimization', state:'Done'});
+  pushWI(devs[0], sprints[0], {type:'Bug', orig:5, completed:9, title:'Bug - Mailbox transfer failure fix', state:'Closed'});
+  pushWI(devs[1], sprints[0], {type:'Task', orig:12, completed:7, title:'Task - PDF conversion plumbing', state:'Active'});
+  pushWI(devs[4], sprints[0], {type:'Spike', orig:8, completed:11, title:'Spike - Investigate MSG to PDF constraints', state:'Resolved'});
+
+  const capacities = [];
+  devs.forEach((dev, idx) => {
+    sprints.forEach(sp => {
+      capacities.push({
+        SprintName: sp.name, ProjectName: dev.project, TeamName: dev.team, UserName: dev.name,
+        CapacityPerDay: 6 + (idx%3)*0.5, DaysOff: sp.name===currentSprint ? (idx===2 ? 1 : idx===4 ? 0.5 : 0) : (idx%2===0 ? 0.5 : 1)
+      });
+    });
+  });
+
+  return {
+    syncTime:'2026-03-31 14:17:53',
+    currentSprint,
+    sprints,
+    developers: devs,
+    capacities,
+    workItems
+  };
+}
+
+async function fetchDashboardData(){
+  if(state.demoMode) return demoDataset();
+
+  // Replace below with your real API later.
+  // Example:
+  // const qs = new URLSearchParams(state.filters).toString();
+  // const resp = await fetch(`/api/dashboard/developer?${qs}`);
+  // if(!resp.ok) throw new Error('API failed');
+  // return await resp.json();
+
+  throw new Error('Live mode is placeholder only in this browser-only single file.');
+}
+
+function initializeFilters(raw){
+  const projects = unique(raw.developers.map(x => x.project)).sort();
+  const developers = unique(raw.developers.map(x => x.name)).sort();
+  const sprints = raw.sprints.map(x => x.name);
+
+  optionize(byId.project, [{value:'ALL',label:'All Projects'}, ...projects.map(x => ({value:x,label:x}))], state.filters.project);
+  optionize(byId.developer, [{value:'ALL',label:'All Developers'}, ...developers.map(x => ({value:x,label:x}))], state.filters.developer);
+  optionize(byId.sprint, [{value:'CURRENT',label:`${raw.currentSprint} (Current Sprint)`}, ...sprints.map(x => ({value:x,label:x}))], state.filters.sprint);
+
+  el('currentSprintText').textContent = raw.currentSprint;
+  el('lastSync').textContent = raw.syncTime;
+}
+
+function normalizeFilters(){
+  state.filters.project = byId.project.value;
+  state.filters.developer = byId.developer.value;
+  state.filters.sprint = byId.sprint.value;
+  state.filters.search = byId.search.value.trim().toLowerCase();
+}
+
+function applyFilters(raw){
+  const sprintName = state.filters.sprint === 'CURRENT' ? raw.currentSprint : state.filters.sprint;
+  const filtered = raw.workItems.filter(w => {
+    const sprintMatch = w.SprintName === sprintName;
+    const projMatch = state.filters.project === 'ALL' || w.ProjectName === state.filters.project;
+    const devMatch = state.filters.developer === 'ALL' || w.AssignedTo === state.filters.developer;
+    const q = state.filters.search;
+    const searchMatch = !q || [w.Title,w.WorkItemType,w.State,w.AssignedTo,w.ProjectName].some(x => safeText(x).toLowerCase().includes(q));
+    return sprintMatch && projMatch && devMatch && searchMatch;
+  });
+
+  const peerBase = raw.workItems.filter(w => {
+    const sprintMatch = w.SprintName === sprintName;
+    const projMatch = state.filters.project === 'ALL' || w.ProjectName === state.filters.project;
+    return sprintMatch && projMatch;
+  });
+
+  const capacities = raw.capacities.filter(c => {
+    const sprintMatch = c.SprintName === sprintName;
+    const projMatch = state.filters.project === 'ALL' || c.ProjectName === state.filters.project;
+    const devMatch = state.filters.developer === 'ALL' || c.UserName === state.filters.developer;
+    return sprintMatch && projMatch && devMatch;
+  });
+
+  return { sprintName, workItems: filtered, peerBase, capacities };
+}
+
+function getSelectedDeveloper(peerMetrics){
+  if(state.filters.developer !== 'ALL') return state.filters.developer;
+  return peerMetrics.length ? peerMetrics[0].name : 'All Developers';
+}
+
+function buildPeerMetrics(peerBase){
+  const names = unique(peerBase.map(x => x.AssignedTo));
+  return names.map(name => {
+    const items = peerBase.filter(x => x.AssignedTo === name);
+    const expected = sum(items, x => x.OriginalEstimate || 0);
+    const delivered = sum(items, x => x.CompletedWork || 0);
+    const storyDelivered = sum(items.filter(x => x.WorkItemType==='User Story'), x => x.StoryPoints || 0);
+    const lead = avg(items, x => x.LeadTimeDays || 0);
+    const bugHours = sum(items.filter(x => x.WorkItemType==='Bug'), x => x.CompletedWork || 0);
+    const debt = sum(items, x => x.TechDebtHours || 0);
+    const review = sum(items.filter(x => x.WorkItemType==='Code Review'), x => x.CompletedWork || 0);
+    const support = sum(items.filter(x => x.WorkItemType==='Support'), x => x.CompletedWork || 0);
+    const nonDev = review + support + sum(items.filter(x => ['Spike'].includes(x.WorkItemType)), x => x.CompletedWork || 0);
+    const focus = delivered ? ((delivered - nonDev) / delivered) * 100 : 0;
+    const deliveryPct = expected ? (delivered/expected)*100 : 0;
+    const predictability = 100 - clamp(avg(items, x => Math.abs(x.DeliveryVarianceHours || 0))*6, 0, 60);
+    const quality = clamp(100 - ((bugHours + debt*0.8)/Math.max(delivered,1))*15, 15, 98);
+    const score = deliveryPct*0.33 + quality*0.27 + clamp(focus,0,100)*0.20 + predictability*0.20;
+    return { name, expected, delivered, storyDelivered, lead, bugHours, debt, focus, deliveryPct, predictability, quality, score, items };
+  }).sort((a,b)=>b.score-a.score);
+}
+
+function renderKPIs(selected, teamAvg, rankIndex, totalPeers){
+  const delivery = selected.expected ? selected.delivered/selected.expected*100 : 0;
+  const velDelta = selected.storyDelivered - teamAvg.storyDelivered;
+  const qualityIndex = selected.quality;
+  const leadTime = selected.lead;
+  const focusRatio = selected.focus;
+
+  el('kpiDelivery').textContent = `${fmt(delivery)}%`;
+  el('kpiDeliveryMeta').innerHTML = `${fmt(selected.delivered)}h delivered vs ${fmt(selected.expected)}h expected · <span class="delta ${delivery>=100?'up':delivery>=90?'warn':'down'}">${delivery>=100?'ahead / on target':'below target'}</span>`;
+
+  el('kpiVelocity').textContent = fmt(selected.storyDelivered);
+  el('kpiVelocityMeta').innerHTML = `Team avg ${fmt(teamAvg.storyDelivered)} SP · <span class="delta ${velDelta>=0?'up':'down'}">${velDelta>=0?'+':''}${fmt(velDelta)} SP</span>`;
+
+  el('kpiQuality').textContent = fmt(qualityIndex);
+  el('kpiQualityMeta').innerHTML = `Bug ${fmt(selected.bugHours)}h · Debt ${fmt(selected.debt)}h · <span class="delta ${qualityIndex>=75?'up':qualityIndex>=60?'warn':'down'}">${qualityIndex>=75?'healthy':'watch closely'}</span>`;
+
+  el('kpiLeadTime').textContent = `${fmt(leadTime)}d`;
+  el('kpiLeadMeta').innerHTML = `Predictability ${fmt(selected.predictability)} · ${leadTime<=5?'<span class="delta up">fast cycle</span>':'<span class="delta warn">improvable</span>'}`;
+
+  el('kpiFocus').textContent = `${fmt(focusRatio)}%`;
+  el('kpiFocusMeta').innerHTML = `Delivery time excluding review / support / spike effort`;
+
+  el('kpiRank').textContent = `#${rankIndex+1}`;
+  el('kpiRankMeta').innerHTML = `Among ${totalPeers} developers · percentile ${fmt(((totalPeers-rankIndex)/totalPeers)*100)}`;
+}
+
+function renderAvailability(capacities, selectedName){
+  const tbody = el('availabilityTable');
+  const days = 5;
+  const cap = capacities.length ? avg(capacities, x => x.CapacityPerDay || 0) : 6;
+  const daysOff = capacities.length ? avg(capacities, x => x.DaysOff || 0) : 0;
+  const rows = [];
+  for(let i=0;i<days;i++){
+    const d = new Date(); d.setDate(d.getDate()+i);
+    const dateText = d.toLocaleDateString('en-IN', {day:'2-digit',month:'short'});
+    const capacity = i < Math.ceil(daysOff) ? 0 : cap;
+    const booked = Math.max(0, Math.round((cap*(0.55 + (i*0.08) + (selectedName.length%3)*0.04))*10)/10);
+    const free = Math.max(0, Math.round((capacity-booked)*10)/10);
+    const status = capacity===0 ? ['Leave','warn'] : free >= 2 ? ['Available','good'] : free >= .5 ? ['Tight','warn'] : ['Overbooked','risk'];
+    rows.push(`<tr><td>${dateText}</td><td>${fmt(capacity)}h</td><td>${fmt(booked)}h</td><td>${fmt(free)}h</td><td><span class="health-chip ${status[1]}">${status[0]}</span></td></tr>`);
+  }
+  tbody.innerHTML = rows.join('');
+}
+
+function renderWorkItems(items){
+  const tbody = el('workItemsTable');
+  tbody.innerHTML = items.slice(0,8).map(w => `
+    <tr>
+      <td>${w.WorkItemId}</td>
+      <td>${w.WorkItemType}</td>
+      <td title="${safeText(w.Title)}">${short(w.Title, 42)}</td>
+      <td>${w.State}</td>
+      <td>${fmt(w.CompletedWork)}/${fmt(w.OriginalEstimate)}h</td>
+    </tr>
+  `).join('') || `<tr><td colspan="5" style="color:var(--muted)">No work items for current filter.</td></tr>`;
+}
+
+function renderRisks(peerBase){
+  const risky = [...peerBase]
+    .filter(w => (w.IsDelayed || (w.RemainingWork > 0 && !isDoneState(w.State))) && (w.DeliveryVarianceHours > 1.5 || w.RemainingWork > 3))
+    .sort((a,b)=>(b.DeliveryVarianceHours||0)-(a.DeliveryVarianceHours||0))
+    .slice(0,8);
+  el('riskTable').innerHTML = risky.map(w => `
+    <tr>
+      <td>${w.WorkItemId}</td>
+      <td>${w.AssignedTo}</td>
+      <td title="${safeText(w.Title)}">${short(w.Title,34)}</td>
+      <td>${fmt(w.DeliveryVarianceHours)}h</td>
+      <td><span class="health-chip ${w.IsDelayed?'risk':'warn'}">${w.IsDelayed?'Delayed':'At Risk'}</span></td>
+    </tr>`).join('') || `<tr><td colspan="5" style="color:var(--muted)">No major risks in this slice.</td></tr>`;
+}
+
+function renderLeaderboard(peerMetrics){
+  el('leaderboardTable').innerHTML = peerMetrics.map((p, idx) => `
+    <tr>
+      <td><span class="rank-chip">#${idx+1}</span></td>
+      <td>${p.name}</td>
+      <td>${fmt(p.deliveryPct)}%</td>
+      <td>${fmt(p.quality)}</td>
+      <td>${fmt(p.focus)}%</td>
+      <td><b>${fmt(p.score)}</b></td>
+    </tr>`).join('');
+}
+
+function renderInsights(selected, teamAvg, rankIndex, totalPeers){
+  const h = [];
+  const i = [];
+  h.push({t:'Delivery posture', d:`Delivered ${fmt(selected.delivered)}h against ${fmt(selected.expected)}h expected. Sprint delivery sits at ${fmt(selected.deliveryPct)}%.`});
+  h.push({t:'Peer standing', d:`Current peer rank is #${rankIndex+1} out of ${totalPeers} developers for the selected slice.`});
+  h.push({t:'Focus health', d:`Focus ratio is ${fmt(selected.focus)}%, meaning most effort is still going into shipping rather than support or review overhead.`});
+
+  if(selected.deliveryPct < 95) i.push({t:'Under-delivery signal', d:'Delivered effort is trailing plan. Review estimate realism, blockers and context switching for this sprint.'});
+  if(selected.quality < 70) i.push({t:'Quality watch', d:'Bug / debt overhead is eating into delivery. Review rework patterns and strengthen review gates.'});
+  if(selected.focus < 65) i.push({t:'Focus erosion', d:'Too much time is going into support, review loops or spikes. Consider reducing interruptions.'});
+  if(selected.predictability < 72) i.push({t:'Estimate variance', d:'Delivery deviation is high. Break stories smaller and tighten estimate discipline.'});
+  if(i.length===0) i.push({t:'Healthy baseline', d:'No major warning from the current slice. Maintain cadence and watch quality trend over next sprint.'});
+
+  el('highlights').innerHTML = h.map(x => `<div class="insight"><strong>${x.t}</strong><span>${x.d}</span></div>`).join('');
+  el('improvements').innerHTML = i.map(x => `<div class="insight"><strong>${x.t}</strong><span>${x.d}</span></div>`).join('');
+}
+
+function getTrendSeries(selected){
+  const sprintMeta = state.raw.sprints.find(s => s.name === state.filtered.sprintName) || state.raw.sprints[0];
+  const start = new Date(sprintMeta.start);
+  const totalDays = Math.max(7, daysBetween(sprintMeta.start, sprintMeta.end)+1);
+  const labels = [];
+  const expected = [];
+  const delivered = [];
+  const totalExpected = selected.expected || 1;
+  const items = selected.items.sort((a,b)=>new Date(a.ChangedDate)-new Date(b.ChangedDate));
+  for(let d=0; d<totalDays; d++){
+    const cur = new Date(start); cur.setDate(start.getDate()+d);
+    labels.push(cur.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}));
+    expected.push(Math.round((totalExpected * ((d+1)/totalDays))*10)/10);
+    const del = sum(items.filter(x => new Date(x.ChangedDate) <= cur), x => x.CompletedWork || 0);
+    delivered.push(Math.round(del*10)/10);
+  }
+  return {labels, expected, delivered};
+}
+
+function metricColor(metric, selectedName){
+  return metric.name===selectedName ? palette.cyan : 'rgba(169,180,208,.45)';
+}
+
+function destroyCharts(){ Object.values(state.charts).forEach(c => c && c.destroy && c.destroy()); state.charts = {}; }
+
+function drawAxis(ctx, area, maxY, labels, opts={}){
+  ctx.save();
+  ctx.strokeStyle='rgba(255,255,255,.08)';
+  ctx.fillStyle='rgba(220,228,255,.72)';
+  ctx.font='12px Inter, Segoe UI, Arial';
+  const steps=4;
+  for(let i=0;i<=steps;i++){
+    const y = area.top + (area.height*(i/steps));
+    ctx.beginPath(); ctx.moveTo(area.left,y); ctx.lineTo(area.right,y); ctx.stroke();
+    const val = Math.round(maxY*(1-i/steps));
+    ctx.fillText(val, 8, y+4);
+  }
+  const count = labels.length;
+  labels.forEach((lab, idx)=>{
+    const x = area.left + (count===1 ? area.width/2 : area.width*(idx/(count-1)));
+    if(idx < count-1){ ctx.beginPath(); ctx.moveTo(x, area.top); ctx.lineTo(x, area.bottom); ctx.strokeStyle='rgba(255,255,255,.03)'; ctx.stroke(); }
+    ctx.fillStyle='rgba(220,228,255,.62)';
+    ctx.fillText(lab, x-14, area.bottom+18);
+  });
+  ctx.restore();
+}
+
+class MiniChart {
+  constructor(canvas){ this.canvas=canvas; this.ctx=canvas.getContext('2d'); this.resize=this.resize.bind(this); window.addEventListener('resize',this.resize); this.resize(); }
+  resize(){ const dpr=window.devicePixelRatio||1; const rect=this.canvas.getBoundingClientRect(); this.canvas.width=rect.width*dpr; this.canvas.height=rect.height*dpr; this.ctx.setTransform(dpr,0,0,dpr,0,0); if(this.lastArgs) this.render(...this.lastArgs); }
+  destroy(){ window.removeEventListener('resize',this.resize); }
+}
+class LineComparisonChart extends MiniChart {
+  render(labels, a, b){ this.lastArgs=[labels,a,b]; const ctx=this.ctx, w=this.canvas.clientWidth, h=this.canvas.clientHeight; ctx.clearRect(0,0,w,h); const area={left:38, top:16, right:w-14, bottom:h-30}; area.width=area.right-area.left; area.height=area.bottom-area.top; const maxY=Math.max(...a,...b,10); drawAxis(ctx, area, maxY, labels);
+    const drawSeries=(data,color,fill=false)=>{ ctx.beginPath(); data.forEach((v,i)=>{ const x=area.left + area.width*(i/(data.length-1||1)); const y=area.bottom - (v/maxY)*area.height; i?ctx.lineTo(x,y):ctx.moveTo(x,y); }); ctx.strokeStyle=color; ctx.lineWidth=3; ctx.stroke(); if(fill){ ctx.lineTo(area.right,area.bottom); ctx.lineTo(area.left,area.bottom); ctx.closePath(); const grad=ctx.createLinearGradient(0,area.top,0,area.bottom); grad.addColorStop(0,color+'44'); grad.addColorStop(1,color+'00'); ctx.fillStyle=grad; ctx.fill(); }
+      data.forEach((v,i)=>{ const x=area.left + area.width*(i/(data.length-1||1)); const y=area.bottom - (v/maxY)*area.height; ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fillStyle=color; ctx.fill(); }); };
+    drawSeries(a,palette.purple,false); drawSeries(b,palette.cyan,true);
+  }
+}
+class BarChart extends MiniChart {
+  render(labels, values, colors, horizontal=false, maxOverride=null){ this.lastArgs=[labels,values,colors,horizontal,maxOverride]; const ctx=this.ctx, w=this.canvas.clientWidth, h=this.canvas.clientHeight; ctx.clearRect(0,0,w,h); const area={left:horizontal?120:38, top:16, right:w-14, bottom:h-30}; area.width=area.right-area.left; area.height=area.bottom-area.top; const maxY=maxOverride || Math.max(...values,10);
+    ctx.save(); ctx.font='12px Inter, Segoe UI'; ctx.fillStyle='rgba(220,228,255,.72)'; ctx.strokeStyle='rgba(255,255,255,.08)';
+    if(horizontal){
+      const rowH = area.height / labels.length;
+      for(let i=0;i<labels.length;i++){
+        const y = area.top + i*rowH + rowH*.18;
+        const bh = rowH*.58;
+        ctx.fillStyle='rgba(255,255,255,.05)'; ctx.fillRect(area.left, y, area.width, bh);
+        const bw = (values[i]/maxY)*area.width;
+        ctx.fillStyle=colors[i] || palette.cyan; ctx.fillRect(area.left, y, bw, bh);
+        ctx.fillStyle='rgba(220,228,255,.72)'; ctx.fillText(short(labels[i],16), 10, y+bh*.68);
+        ctx.fillText(fmt(values[i]), area.left + bw + 8, y+bh*.68);
+      }
+    } else {
+      drawAxis(ctx, area, maxY, labels);
+      const gap = 16, bw = Math.max(16, (area.width - gap*(labels.length+1))/labels.length);
+      labels.forEach((lab, i)=>{
+        const x = area.left + gap + i*(bw+gap);
+        const bh = (values[i]/maxY)*area.height;
+        const y = area.bottom - bh;
+        ctx.fillStyle=colors[i] || palette.cyan; ctx.fillRect(x, y, bw, bh);
+        ctx.fillStyle='rgba(240,244,255,.7)'; ctx.fillText(fmt(values[i]), x+2, y-6);
+      });
+    }
+    ctx.restore();
+  }
+}
+class DonutChart extends MiniChart {
+  render(labels, values, colors){ this.lastArgs=[labels,values,colors]; const ctx=this.ctx, w=this.canvas.clientWidth, h=this.canvas.clientHeight; ctx.clearRect(0,0,w,h); const total = sum(values); const cx = w*.34, cy = h*.5, r = Math.min(w,h)*.24, ir = r*.56; let start=-Math.PI/2;
+    values.forEach((v,i)=>{ const end = start + (v/Math.max(total,1))*Math.PI*2; ctx.beginPath(); ctx.arc(cx,cy,r,start,end); ctx.arc(cx,cy,ir,end,start,true); ctx.closePath(); ctx.fillStyle=colors[i]; ctx.fill(); start=end; });
+    ctx.fillStyle='rgba(238,242,255,.92)'; ctx.font='700 28px Inter'; ctx.textAlign='center'; ctx.fillText(total ? Math.round((values[0]/total)*100)+'%' : '0%', cx, cy+9); ctx.font='12px Inter'; ctx.fillStyle='rgba(169,180,208,.85)'; ctx.fillText('largest share', cx, cy+28);
+    ctx.textAlign='left'; labels.forEach((lab,i)=>{ const y = 26 + i*24; ctx.fillStyle=colors[i]; ctx.fillRect(w*.62, y, 12, 12); ctx.fillStyle='rgba(220,228,255,.78)'; ctx.font='12px Inter'; ctx.fillText(`${lab}  ${fmt(values[i])}h`, w*.62+20, y+11); });
+  }
+}
+class GroupBarChart extends MiniChart {
+  render(labels, datasets){ this.lastArgs=[labels,datasets]; const ctx=this.ctx, w=this.canvas.clientWidth, h=this.canvas.clientHeight; ctx.clearRect(0,0,w,h); const area={left:40, top:16, right:w-14, bottom:h-30}; area.width=area.right-area.left; area.height=area.bottom-area.top; const maxY=Math.max(...datasets.flatMap(d=>d.values),10); drawAxis(ctx, area, maxY, labels);
+    const groups = labels.length; const totalBarArea = area.width / groups; const barW = Math.max(10, totalBarArea / (datasets.length+1.8));
+    labels.forEach((lab,i)=>{
+      const startX = area.left + i*totalBarArea + totalBarArea*.18;
+      datasets.forEach((ds,j)=>{
+        const val = ds.values[i]; const bh = (val/maxY)*area.height; const x = startX + j*(barW+6); const y = area.bottom - bh;
+        ctx.fillStyle = ds.color; ctx.fillRect(x,y,barW,bh);
+      });
+    });
+    ctx.font='12px Inter'; ctx.fillStyle='rgba(220,228,255,.76)'; let lx=48; datasets.forEach(ds=>{ ctx.fillStyle=ds.color; ctx.fillRect(lx,4,12,12); ctx.fillStyle='rgba(220,228,255,.76)'; ctx.fillText(ds.label, lx+18, 14); lx += 120; });
+  }
+}
+
+function renderCharts(selected, teamAvg, peerMetrics){
+  destroyCharts();
+  const trend = getTrendSeries(selected);
+  state.charts.effort = new LineComparisonChart(el('effortTrendChart')); state.charts.effort.render(trend.labels, trend.expected, trend.delivered);
+
+  state.charts.velocity = new BarChart(el('velocityChart')); state.charts.velocity.render(
+    ['Delivered SP','Sprint Avg','Personal Avg'],
+    [selected.storyDelivered, teamAvg.storyDelivered, avg(peerMetrics.filter(p=>p.name===selected.name), x=>x.storyDelivered)||selected.storyDelivered*0.92],
+    [palette.cyan,palette.purple,palette.teal]
+  );
+
+  const workMixBuckets = ['User Story','Task','Bug','Code Review','Support','Spike'];
+  const workMixValues = workMixBuckets.map(k => sum(selected.items.filter(x => x.WorkItemType===k), x => x.CompletedWork || 0));
+  state.charts.workMix = new DonutChart(el('workMixChart')); state.charts.workMix.render(workMixBuckets, workMixValues, [palette.cyan,palette.purple,palette.orange,palette.teal,palette.pink,palette.yellow]);
+
+  const nonDevBuckets = ['Meetings','Support','KT','Review','Blockers'];
+  const nonDevValues = [
+    Math.max(1, selected.delivered*.08),
+    sum(selected.items.filter(x => x.WorkItemType==='Support'), x => x.CompletedWork || 0),
+    Math.max(.5, selected.delivered*.03),
+    sum(selected.items.filter(x => x.WorkItemType==='Code Review'), x => x.CompletedWork || 0),
+    Math.max(.2, selected.items.filter(x => !isDoneState(x.State)).length*.6)
+  ];
+  state.charts.nonDev = new BarChart(el('nonDevChart')); state.charts.nonDev.render(nonDevBuckets, nonDevValues, [palette.red,palette.orange,palette.yellow,palette.teal,palette.purple]);
+
+  state.charts.quality = new GroupBarChart(el('qualityChart')); state.charts.quality.render(
+    ['Bug Hours','Rework','Tech Debt','Review Load'],
+    [
+      {label:'Selected', color:palette.cyan, values:[selected.bugHours, selected.bugHours*.55, selected.debt, sum(selected.items.filter(x=>x.WorkItemType==='Code Review'), x=>x.CompletedWork||0)]},
+      {label:'Team Avg', color:palette.purple, values:[teamAvg.bugHours, teamAvg.bugHours*.48, teamAvg.debt, sum(teamAvg.items.filter(x=>x.WorkItemType==='Code Review'), x=>x.CompletedWork||0)]}
+    ]
+  );
+
+  state.charts.lead = new GroupBarChart(el('leadTimeChart')); state.charts.lead.render(
+    ['Lead Time(d)','Delayed Items','Early Items','Avg Variance(h)'],
+    [
+      {label:'Selected', color:palette.cyan, values:[selected.lead, selected.items.filter(x=>x.IsDelayed).length, selected.items.filter(x=>x.IsEarly).length, avg(selected.items, x=>Math.abs(x.DeliveryVarianceHours||0))]},
+      {label:'Team Avg', color:palette.purple, values:[teamAvg.lead, avg(peerMetrics, x=>x.items.filter(y=>y.IsDelayed).length), avg(peerMetrics, x=>x.items.filter(y=>y.IsEarly).length), avg(peerMetrics, x=>avg(x.items, y=>Math.abs(y.DeliveryVarianceHours||0)))]}
+    ]
+  );
+
+  const conceptualCode = [
+    Math.max(1, selected.items.length*2.2),
+    Math.max(1, avg(selected.items, x=>x.Commits||0)),
+    Math.max(1, avg(selected.items, x=>x.ReviewLoops||0)+1),
+    Math.max(1, teamAvg.items.length*1.8),
+    Math.max(1, avg(teamAvg.items, x=>x.Commits||0)),
+    Math.max(1, avg(teamAvg.items, x=>x.ReviewLoops||0)+1)
+  ];
+  state.charts.code = new BarChart(el('codeActivityChart')); state.charts.code.render(
+    ['Sel. WI','Sel. Commits/WI','Sel. Churn','Avg WI','Avg Commits/WI','Avg Churn'], conceptualCode,
+    [palette.cyan,palette.cyan,palette.cyan,palette.purple,palette.purple,palette.purple]
+  );
+
+  const peerLabels = peerMetrics.map(p=>p.name);
+  const peerVals = peerMetrics.map(p=>Math.round(p.score*10)/10);
+  const selectedName = selected.name;
+  state.charts.peer = new BarChart(el('peerComparisonChart')); state.charts.peer.render(peerLabels, peerVals, peerMetrics.map(p=>metricColor(p, selectedName)), true, Math.max(...peerVals,100));
+}
+
+async function loadAndRender(){
+  try{
+    normalizeFilters();
+    if(!state.raw){
+      state.raw = await fetchDashboardData();
+      initializeFilters(state.raw);
+    }
+    state.filtered = applyFilters(state.raw);
+    const peerMetrics = buildPeerMetrics(state.filtered.peerBase);
+    const selectedName = getSelectedDeveloper(peerMetrics);
+    const selected = peerMetrics.find(x=>x.name===selectedName) || peerMetrics[0] || {name:'No Data', expected:0, delivered:0, storyDelivered:0, lead:0, bugHours:0, debt:0, focus:0, deliveryPct:0, predictability:0, quality:0, score:0, items:[]};
+    const teamAvg = peerMetrics.length ? {
+      storyDelivered: avg(peerMetrics, x=>x.storyDelivered),
+      bugHours: avg(peerMetrics, x=>x.bugHours),
+      debt: avg(peerMetrics, x=>x.debt),
+      lead: avg(peerMetrics, x=>x.lead),
+      items: selected.items,
+    } : {storyDelivered:0, bugHours:0, debt:0, lead:0, items:[]};
+    const rankIndex = Math.max(0, peerMetrics.findIndex(x=>x.name===selected.name));
+
+    renderKPIs(selected, teamAvg, rankIndex, Math.max(peerMetrics.length,1));
+    renderAvailability(state.filtered.capacities, selected.name);
+    renderWorkItems(state.filtered.workItems.filter(w=>state.filters.developer==='ALL' || w.AssignedTo===selected.name));
+    renderRisks(state.filtered.peerBase);
+    renderLeaderboard(peerMetrics);
+    renderInsights(selected, teamAvg, rankIndex, Math.max(peerMetrics.length,1));
+    renderCharts(selected, teamAvg, peerMetrics);
+
+    el('modeText').textContent = state.demoMode ? 'Demo mode' : 'Live mode';
+    el('dbState').textContent = state.demoMode ? 'Rendering with sample data shaped around your Azure tables.' : 'Live mode selected, but direct SQL access from browser is not possible.';
+    el('peerBadge').textContent = `${fmt(((peerMetrics.length-rankIndex)/Math.max(peerMetrics.length,1))*100)} percentile`;
+    el('effortBadge').textContent = `${state.filtered.sprintName}`;
+    el('velocityBadge').textContent = `${selected.name}`;
+    el('availabilityBadge').textContent = `${selected.name}`;
+    el('wiBadge').textContent = `${state.filtered.workItems.length} items`;
+  } catch(err){
+    console.error(err);
+    alert(err.message || 'Failed to render dashboard');
+  }
+}
+
+byId.project.addEventListener('change', loadAndRender);
+byId.developer.addEventListener('change', loadAndRender);
+byId.sprint.addEventListener('change', loadAndRender);
+byId.search.addEventListener('input', loadAndRender);
+el('clearBtn').addEventListener('click', ()=>{
+  state.filters = { project:'ALL', developer:'ALL', sprint:'CURRENT', search:'' };
+  byId.search.value='';
+  initializeFilters(state.raw);
+  loadAndRender();
+});
+el('refreshBtn').addEventListener('click', ()=>{ state.raw = null; loadAndRender(); });
+el('toggleDemoBtn').addEventListener('click', ()=>{ state.demoMode = !state.demoMode; state.raw = null; loadAndRender(); });
+
+loadAndRender();
+</script>
+</body>
+</html>
