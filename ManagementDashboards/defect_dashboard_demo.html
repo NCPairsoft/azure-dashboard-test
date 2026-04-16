@@ -97,14 +97,16 @@
     }
 
     .app {
-      max-width: 1280px;
+      width: 100%;
+      max-width: none;
       margin: 0 auto;
-      padding: 12px 12px 20px;
+      padding: 18px 20px 24px;
     }
 
     .widget-shell {
       min-height: 100%;
       overflow: auto;
+      padding-top: 10px;
     }
 
     .topbar {
@@ -428,12 +430,25 @@
       font-weight: 700;
     }
 
+    .floating-ai-anchor {
+      position: sticky;
+      bottom: 18px;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+      padding-right: 8px;
+      z-index: 20;
+      pointer-events: none;
+    }
+
     .floating-ai {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
+      position: relative;
+      right: 0;
+      bottom: 0;
       z-index: 30;
       box-shadow: var(--shadow);
+      pointer-events: auto;
+      min-width: 108px;
     }
 
     .drawer {
@@ -515,7 +530,7 @@
     }
 
     @media (max-width: 900px) {
-      .app { padding: 10px; }
+      .app { padding: 14px; }
       .grid-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .controls-row { grid-template-columns: 1fr; }
       .span-3, .span-4, .span-5, .span-6, .span-7, .span-8, .span-12 { grid-column: span 12; }
@@ -716,10 +731,11 @@
         </table>
       </article>
     </section>
+    <div class="floating-ai-anchor">
+      <button class="floating-ai" id="floatingAiBtn">Ask AI</button>
+    </div>
   </div>
   </div>
-
-  <button class="floating-ai" id="floatingAiBtn">Ask AI</button>
 
   <aside class="drawer" id="aiDrawer">
     <div class="drawer-header">
@@ -1082,57 +1098,28 @@
       const { w, h } = clearSvg(svg);
       const total = Math.max(met + missed, 1);
       const pct = met / total;
-
-      const strokeW = 14;
-      const sidePad = 20;
-      const topPad = 18;
-      const labelBlockW = 108;
-      const radius = Math.max(54, Math.min((w - sidePad * 2) / 2 - 14, (h - 24) / 2 - 10));
-      const cx = Math.max(sidePad + radius, (w - labelBlockW) / 2);
-      const cy = h / 2 + 2;
-      const circumference = 2 * Math.PI * radius;
+      const cx = w / 2;
+      const cy = h / 2 + 6;
+      const r = Math.min(w, h) * 0.30;
+      const stroke = 12;
+      const circumference = 2 * Math.PI * r;
 
       const bg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      bg.setAttribute('cx', cx);
-      bg.setAttribute('cy', cy);
-      bg.setAttribute('r', radius);
-      bg.setAttribute('fill', 'none');
-      bg.setAttribute('stroke', cssVar('--grid'));
-      bg.setAttribute('stroke-width', strokeW);
+      bg.setAttribute('cx', cx); bg.setAttribute('cy', cy); bg.setAttribute('r', r);
+      bg.setAttribute('fill', 'none'); bg.setAttribute('stroke', cssVar('--grid')); bg.setAttribute('stroke-width', stroke);
       svg.appendChild(bg);
 
       const fg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      fg.setAttribute('cx', cx);
-      fg.setAttribute('cy', cy);
-      fg.setAttribute('r', radius);
-      fg.setAttribute('fill', 'none');
-      fg.setAttribute('stroke', cssVar('--success'));
-      fg.setAttribute('stroke-width', strokeW);
+      fg.setAttribute('cx', cx); fg.setAttribute('cy', cy); fg.setAttribute('r', r);
+      fg.setAttribute('fill', 'none'); fg.setAttribute('stroke', cssVar('--success')); fg.setAttribute('stroke-width', stroke);
       fg.setAttribute('stroke-linecap', 'round');
       fg.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
       fg.setAttribute('stroke-dasharray', `${circumference * pct} ${circumference}`);
       svg.appendChild(fg);
 
-      addText(svg, cx, cy + 8, Math.round(pct * 100) + '%', {
-        anchor: 'middle',
-        fill: cssVar('--text'),
-        size: 36,
-        weight: 800
-      });
-
-      const labelX = w - 18;
-      addText(svg, labelX, topPad, `Met: ${met}`, {
-        anchor: 'end',
-        fill: cssVar('--success'),
-        size: 14,
-        weight: 800
-      });
-      addText(svg, labelX, topPad + 24, `Missed: ${missed}`, {
-        anchor: 'end',
-        fill: cssVar('--danger'),
-        size: 14,
-        weight: 800
-      });
+      addText(svg, w - 20, 22, `Met: ${met}`, { anchor: 'end', fill: cssVar('--success'), size: 12, weight: 700 });
+      addText(svg, w - 20, 40, `Missed: ${missed}`, { anchor: 'end', fill: cssVar('--danger'), size: 12, weight: 700 });
+      addText(svg, cx, cy + 6, Math.round(pct * 100) + '%', { anchor: 'middle', fill: cssVar('--text'), size: 32, weight: 800 });
     }
 
     function renderTable(products) {
