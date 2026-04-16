@@ -1,1293 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Defect Operations Dashboard - Demo</title>
-  <style>
-    :root {
-      --bg: #0b1220;
-      --bg-elev: rgba(18, 27, 46, 0.92);
-      --bg-soft: rgba(30, 41, 59, 0.55);
-      --card: rgba(17, 24, 39, 0.88);
-      --card-2: rgba(24, 32, 49, 0.88);
-      --text: #e5eefc;
-      --muted: #99a7c2;
-      --border: rgba(148, 163, 184, 0.18);
-      --accent: #56b6ff;
-      --accent-2: #9d7cff;
-      --success: #41d392;
-      --warning: #f9b84f;
-      --danger: #ff6f7d;
-      --shadow: 0 20px 40px rgba(0,0,0,0.28);
-      --grid: rgba(255,255,255,0.06);
-      --chip: rgba(86, 182, 255, 0.12);
-      --sidebar-width: 390px;
-      --radius: 20px;
-    }
-
-    body[data-theme="light"] {
-      --bg: #eef3f9;
-      --bg-elev: rgba(255, 255, 255, 0.95);
-      --bg-soft: rgba(255, 255, 255, 0.75);
-      --card: rgba(255,255,255,0.96);
-      --card-2: rgba(248, 250, 252, 0.98);
-      --text: #1e293b;
-      --muted: #64748b;
-      --border: rgba(15, 23, 42, 0.08);
-      --accent: #0f6fff;
-      --accent-2: #5b67f1;
-      --success: #0f9b63;
-      --warning: #d98a00;
-      --danger: #d9485f;
-      --shadow: 0 12px 28px rgba(15,23,42,0.08);
-      --grid: rgba(15,23,42,0.06);
-      --chip: rgba(15, 111, 255, 0.08);
-    }
-
-    body[data-theme="warm"] {
-      --bg: #f6efe5;
-      --bg-elev: rgba(255, 249, 239, 0.95);
-      --bg-soft: rgba(255, 247, 234, 0.8);
-      --card: rgba(255, 252, 245, 0.96);
-      --card-2: rgba(250, 244, 233, 0.96);
-      --text: #3c2e1f;
-      --muted: #7e6750;
-      --border: rgba(92, 70, 45, 0.10);
-      --accent: #b78621;
-      --accent-2: #7a8df2;
-      --success: #308d63;
-      --warning: #c48615;
-      --danger: #c55b52;
-      --shadow: 0 14px 30px rgba(109, 79, 36, 0.12);
-      --grid: rgba(92,70,45,0.08);
-      --chip: rgba(183, 134, 33, 0.10);
-    }
-
-    body[data-theme="blue"] {
-      --bg: #edf4ff;
-      --bg-elev: rgba(246, 250, 255, 0.96);
-      --bg-soft: rgba(240, 247, 255, 0.8);
-      --card: rgba(255,255,255,0.96);
-      --card-2: rgba(241, 247, 255, 0.98);
-      --text: #18324c;
-      --muted: #567189;
-      --border: rgba(24, 50, 76, 0.10);
-      --accent: #1d8fff;
-      --accent-2: #3b82f6;
-      --success: #159d79;
-      --warning: #dd8d17;
-      --danger: #d94f68;
-      --shadow: 0 16px 30px rgba(30, 64, 175, 0.10);
-      --grid: rgba(24,50,76,0.08);
-      --chip: rgba(29, 143, 255, 0.10);
-    }
-
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-    body {
-      font-family: Inter, Segoe UI, Arial, sans-serif;
-      background:
-        radial-gradient(circle at top right, rgba(86, 182, 255, 0.10), transparent 28%),
-        radial-gradient(circle at left bottom, rgba(157, 124, 255, 0.08), transparent 25%),
-        var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      transition: background-color 0.25s ease, color 0.25s ease;
-    }
-
-    .app {
-      width: min(100%, 1620px);
-      max-width: none;
-      margin: 0 auto;
-      padding: 18px 14px 28px;
-    }
-
-    .widget-shell {
-      min-height: 100vh;
-      overflow: visible;
-      padding-top: 14px;
-    }
-
-    .topbar {
-      display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(390px, 0.85fr);
-      gap: 12px;
-      margin-bottom: 12px;
-      align-items: stretch;
-    }
-
-    .panel {
-      background: linear-gradient(180deg, var(--card), var(--card-2));
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(14px);
-    }
-
-    .hero {
-      padding: 18px 18px 16px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero:before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(120deg, rgba(255,255,255,0.04), transparent 30%, rgba(255,255,255,0.03));
-      pointer-events: none;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--chip);
-      color: var(--accent);
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      margin-bottom: 14px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 24px;
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-    }
-
-    .subtext {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-      margin-top: 8px;
-      max-width: 860px;
-    }
-
-    .hero-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    .meta-pill {
-      border: 1px solid var(--border);
-      background: var(--bg-soft);
-      border-radius: 999px;
-      padding: 8px 12px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .controls {
-      padding: 16px;
-      display: grid;
-      gap: 12px;
-      align-content: start;
-    }
-
-    .controls-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .field {
-      display: grid;
-      gap: 6px;
-    }
-
-    .field label {
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    select, input, textarea, button {
-      font: inherit;
-    }
-
-    select, input, textarea {
-      width: 100%;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: var(--bg-elev);
-      color: var(--text);
-      padding: 12px 14px;
-      outline: none;
-    }
-
-    button {
-      border: 0;
-      border-radius: 14px;
-      padding: 12px 14px;
-      color: white;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      cursor: pointer;
-      font-weight: 700;
-      transition: transform 0.15s ease, opacity 0.15s ease;
-    }
-
-    button:hover { transform: translateY(-1px); }
-    button.secondary {
-      background: var(--bg-elev);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .action-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .grid-kpis {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .kpi-card {
-      padding: 14px;
-      min-height: 108px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-width: 0;
-    }
-
-    .kpi-label {
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .kpi-value {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin-top: 8px;
-    }
-
-    .delta {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      width: fit-content;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: var(--bg-soft);
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .delta.good { color: var(--success); }
-    .delta.warn { color: var(--warning); }
-    .delta.bad { color: var(--danger); }
-
-    .section-grid {
-      display: grid;
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 12px;
-      align-items: start;
-      grid-auto-flow: row dense;
-    }
-
-    .chart-card {
-      padding: 16px;
-      min-height: 300px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .span-3 { grid-column: span 3; min-width: 0; }
-    .span-4 { grid-column: span 4; min-width: 0; }
-    .span-5 { grid-column: span 5; min-width: 0; }
-    .span-6 { grid-column: span 6; min-width: 0; }
-    .span-7 { grid-column: span 7; min-width: 0; }
-    .span-8 { grid-column: span 8; min-width: 0; }
-    .span-12 { grid-column: span 12; min-width: 0; }
-
-    .compact-card {
-      min-height: 268px;
-    }
-
-    /* Reusable grid helpers for future widgets */
-    .row-12 { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; align-items: start; }
-    .col-12 { grid-column: span 12; min-width: 0; }
-    .col-6 { grid-column: span 6; min-width: 0; }
-    .col-4 { grid-column: span 4; min-width: 0; }
-    .col-3 { grid-column: span 3; min-width: 0; }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: start;
-    }
-
-    .card-title {
-      font-size: 16px;
-      font-weight: 800;
-      margin: 0;
-    }
-
-    .card-subtitle {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.55;
-      margin-top: 4px;
-    }
-
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 6px;
-    }
-
-    .legend-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    .chart-wrap {
-      flex: 1;
-      min-height: 200px;
-      background: linear-gradient(180deg, transparent, rgba(255,255,255,0.01));
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 12px;
-      position: relative;
-    }
-
-    svg.chart {
-      width: 100%;
-      height: 100%;
-      overflow: visible;
-    }
-
-    .chart-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: var(--muted);
-      font-size: 12px;
-      gap: 12px;
-    }
-
-    .mini-note {
-      padding: 6px 10px;
-      background: var(--chip);
-      border-radius: 999px;
-    }
-
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 6px;
-      font-size: 13px;
-    }
-
-    .table th, .table td {
-      padding: 10px 10px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-    }
-
-    .table th { color: var(--muted); font-weight: 700; }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--bg-soft);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .floating-ai-anchor {
-      position: static;
-      display: block;
-      margin: 0;
-      padding: 0;
-      z-index: 20;
-      pointer-events: none;
-      height: 0;
-    }
-
-    .floating-ai {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      z-index: 45;
-      box-shadow: var(--shadow);
-      pointer-events: auto;
-      min-width: 108px;
-    }
-
-    .drawer {
-      position: fixed;
-      top: 0;
-      right: calc(-1 * var(--sidebar-width) - 20px);
-      width: var(--sidebar-width);
-      height: 100vh;
-      background: linear-gradient(180deg, var(--card), var(--card-2));
-      border-left: 1px solid var(--border);
-      box-shadow: -10px 0 30px rgba(0,0,0,0.18);
-      max-width: min(var(--sidebar-width), calc(100vw - 16px));
-      transition: right 0.24s ease;
-      z-index: 40;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-    }
-
-    .drawer.open { right: 0; }
-
-    .drawer-header {
-      padding: 18px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: start;
-      gap: 12px;
-    }
-
-    .drawer-body {
-      padding: 18px;
-      overflow: auto;
-      display: grid;
-      gap: 14px;
-      align-content: start;
-    }
-
-    .ai-box {
-      padding: 16px;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      background: var(--bg-soft);
-    }
-
-    .ai-box h3 {
-      margin: 0 0 8px;
-      font-size: 15px;
-    }
-
-    .ai-text {
-      color: var(--text);
-      font-size: 14px;
-      line-height: 1.65;
-      white-space: pre-line;
-    }
-
-    .quick-grid {
-      display: grid;
-      gap: 10px;
-    }
-
-    .drawer-footer {
-      padding: 18px;
-      border-top: 1px solid var(--border);
-      display: grid;
-      gap: 10px;
-    }
-
-    .muted { color: var(--muted); }
-
-    .sr-note {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    @media (max-width: 1180px) {
-      .topbar { grid-template-columns: 1fr; }
-      .span-4 { grid-column: span 6; }
-      .grid-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    }
-
-    @media (max-width: 900px) {
-      .app { padding: 14px 10px 24px; }
-      .grid-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .controls-row { grid-template-columns: 1fr; }
-      .span-3, .span-4, .span-5, .span-6, .span-7, .span-8, .span-12 { grid-column: span 12; }
-      .drawer { width: min(100vw - 8px, 420px); }
-      h1 { font-size: 22px; }
-    }
-
-    @media (max-width: 640px) {
-      .grid-kpis { grid-template-columns: 1fr; }
-      .meta-pill { width: 100%; }
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Defect Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+html, body {
+  margin:0;
+  padding:0;
+  font-family:Segoe UI, sans-serif;
+  background:#f5f3ef;
+  overflow-x:hidden;
+}
+
+/* Container */
+.dashboard-container{
+  max-width:1200px;
+  margin:0 auto;
+  padding:20px 16px;
+}
+
+/* Cards */
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Grid */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:16px;
+}
+
+/* SLA Widget */
+.sla-container{
+  position:relative;
+  height:220px;
+}
+
+.sla-summary{
+  position:absolute;
+  top:8px;
+  right:12px;
+  font-size:12px;
+  text-align:right;
+}
+
+.met{color:green;font-weight:bold;}
+.missed{color:red;font-weight:bold;}
+
+.donut-wrapper{
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.donut-center{
+  position:absolute;
+  font-size:28px;
+  font-weight:bold;
+}
+
+/* AI Drawer */
+.ai-drawer{
+  position:fixed;
+  right:0;
+  top:0;
+  width:300px;
+  height:100vh;
+  background:#fff;
+  box-shadow:-2px 0 10px rgba(0,0,0,0.1);
+  display:none;
+  flex-direction:column;
+}
+
+.ai-content{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  padding:12px;
+}
+
+.ai-input{
+  margin-top:auto;
+}
+
+textarea{
+  width:100%;
+  height:80px;
+}
+
+/* Button */
+.ask-ai-btn{
+  position:fixed;
+  bottom:16px;
+  right:16px;
+  background:#6c63ff;
+  color:#fff;
+  border:none;
+  padding:10px 16px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+</style>
 </head>
-<body data-theme="dark">
-  <div class="widget-shell">
-  <div class="app">
-    <div class="topbar">
-      <section class="panel hero">
-        <div class="eyebrow">Demo Mode • Frontend Prototype</div>
-        <h1>Defect Operations Dashboard</h1>
-        <div class="subtext">
-          Compact single-file dashboard designed for Azure DevOps web widgets. Demo mode is built in, theme switching is live, and scrollbars will appear automatically if content exceeds the widget area.
-        </div>
-        <div class="hero-meta">
-          <div class="meta-pill" id="activeFilterSummary">Filters: All Products • All Customers • Last 6 Months</div>
-          <div class="meta-pill" id="refreshStamp">Last refreshed: Demo Snapshot</div>
-          <div class="meta-pill">Theme switching enabled</div>
-          <div class="meta-pill">AI insight drawer included</div>
-        </div>
-      </section>
 
-      <aside class="panel controls">
-        <div class="controls-row">
-          <div class="field">
-            <label for="dateRange">Date Range</label>
-            <select id="dateRange">
-              <option value="3">Last 3 Months</option>
-              <option value="6" selected>Last 6 Months</option>
-              <option value="12">Last 12 Months</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="themeSelect">Theme</label>
-            <select id="themeSelect">
-              <option value="dark">Dark Classic</option>
-              <option value="light">Light Professional</option>
-              <option value="warm">Warm BI</option>
-              <option value="blue">Blue Executive</option>
-            </select>
-          </div>
-        </div>
+<body>
 
-        <div class="controls-row">
-          <div class="field">
-            <label for="productFilter">Product</label>
-            <select id="productFilter"></select>
-          </div>
-          <div class="field">
-            <label for="customerFilter">Customer</label>
-            <select id="customerFilter"></select>
-          </div>
-        </div>
+<div class="dashboard-container">
 
-        <div class="controls-row">
-          <div class="field">
-            <label for="statusFilter">Customer Status</label>
-            <select id="statusFilter"></select>
-          </div>
-          <div class="field">
-            <label for="severityFocus">Severity Focus</label>
-            <select id="severityFocus"></select>
-          </div>
-        </div>
+<h2>Defect Operations Dashboard</h2>
 
-        <div class="action-row">
-          <button id="applyFilters">Apply Demo Filters</button>
-          <button id="resetFilters" class="secondary">Reset</button>
-          <button id="openAi" class="secondary">Open AI Insights</button>
-        </div>
-        <div class="sr-note">Tip: the current prototype updates all widgets locally without any backend.</div>
-      </aside>
-    </div>
+<div class="grid">
 
-    <section class="grid-kpis" id="kpiGrid"></section>
+<div class="card">
+<h3>Created vs Closed</h3>
+<canvas id="trend"></canvas>
+</div>
 
-    <section class="section-grid">
-      <article class="panel chart-card span-12">
-        <div class="card-header">
-          <div>
-            <h3 class="card-title">Created vs Closed Trend</h3>
-            <div class="card-subtitle">Monthly inflow versus closure movement for the selected period.</div>
-          </div>
-          <div class="badge">Trend</div>
-        </div>
-        <div class="legend">
-          <span class="legend-item"><span class="dot" style="background: var(--accent)"></span>Created</span>
-          <span class="legend-item"><span class="dot" style="background: var(--success)"></span>Closed</span>
-        </div>
-        <div class="chart-wrap"><svg id="trendChart" class="chart"></svg></div>
-        <div class="chart-footer"><span class="mini-note" id="trendNote">Demo monthly dataset</span><span id="trendFoot"></span></div>
-      </article>
+<div class="card sla-container">
+<h3>4-Week Target Compliance</h3>
 
-      <article class="panel chart-card span-6 compact-card">
-        <div class="card-header">
-          <div>
-            <h3 class="card-title">Pending by Severity</h3>
-            <div class="card-subtitle">Active backlog risk split.</div>
-          </div>
-          <div class="badge">Risk</div>
-        </div>
-        <div class="chart-wrap"><svg id="severityChart" class="chart"></svg></div>
-        <div class="chart-footer"><span id="severityFoot"></span><span class="mini-note">Backlog</span></div>
-      </article>
+<div class="sla-summary">
+<div class="met">Met: 34</div>
+<div class="missed">Missed: 18</div>
+</div>
 
-      <article class="panel chart-card span-6 compact-card">
-        <div class="card-header">
-          <div>
-            <h3 class="card-title">Pending by State</h3>
-            <div class="card-subtitle">Where open work is sitting operationally.</div>
-          </div>
-          <div class="badge">Flow</div>
-        </div>
-        <div class="chart-wrap"><svg id="stateChart" class="chart"></svg></div>
-        <div class="chart-footer"><span id="stateFoot"></span><span class="mini-note">Current open items</span></div>
-      </article>
-    </section>
+<div class="donut-wrapper">
+<canvas id="sla"></canvas>
+<div class="donut-center">65%</div>
+</div>
 
-    <section class="section-grid">
-      <article class="panel chart-card span-4">
-        <div class="card-header">
-          <div>
-            <h3 class="card-title">Pending by Product</h3>
-            <div class="card-subtitle">Backlog concentration across products.</div>
-          </div>
-          <div class="badge">Products</div>
-        </div>
-        <div class="chart-wrap"><svg id="productChart" class="chart"></svg></div>
-        <div class="chart-footer"><span id="productFoot"></span><span class="mini-note">Top products</span></div>
-      </article>
+</div>
 
-      <article class="panel chart-card span-4">
-        <div class="card-header">
-          <div>
-            <h3 class="card-title">Weekly Throughput</h3>
-            <div class="card-subtitle">Recent weekly created and closed trend.</div>
-          </div>
-          <div class="badge">Weekly</div>
-        </div>
-        <div class="chart-wrap"><svg id="weeklyChart" class="chart"></svg></div>
-        <div class="chart-footer"><span id="weeklyFoot"></span><span class="mini-note">Last 8 weeks</span></div>
-      </article>
+</div>
 
-      <article class="panel chart-card span-4">
-        <div class="card-header">
-          <div>
-            <h3 class="card-title">4-Week Target Compliance</h3>
-            <div class="card-subtitle">Met target versus missed target.</div>
-          </div>
-          <div class="badge">SLA</div>
-        </div>
-        <div class="chart-wrap"><svg id="slaChart" class="chart"></svg></div>
-        <div class="chart-footer"><span id="slaFoot"></span><span class="mini-note">Current filter view</span></div>
-      </article>
-    </section>
+</div>
 
-    <section class="section-grid">
-      <article class="panel chart-card span-6">
-        <div class="card-header">
-          <div>
-            <h3 class="card-title">Developer Closures</h3>
-            <div class="card-subtitle">Demo monthly closure distribution by developer.</div>
-          </div>
-          <div class="badge">Ownership</div>
-        </div>
-        <div class="chart-wrap"><svg id="developerChart" class="chart"></svg></div>
-        <div class="chart-footer"><span id="developerFoot"></span><span class="mini-note">Selected period</span></div>
-      </article>
+<!-- AI Drawer -->
+<div class="ai-drawer" id="aiDrawer">
+<div class="ai-content">
+<h3>AI Insights</h3>
 
-      <article class="panel chart-card span-6">
-        <div class="card-header">
-          <div>
-            <h3 class="card-title">Operational Attention Table</h3>
-            <div class="card-subtitle">Priority areas based on backlog volume, ACV impact, and aging.</div>
-          </div>
-          <div class="badge">Review</div>
-        </div>
-        <table class="table" id="attentionTable">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Pending</th>
-              <th>High/Critical</th>
-              <th>ACV Impact</th>
-              <th>Old &gt; 8w</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </article>
-    </section>
-    <div class="floating-ai-anchor">
-      <button class="floating-ai" id="floatingAiBtn">Ask AI</button>
-    </div>
-  </div>
-  </div>
+<div class="ai-input">
+<textarea placeholder="Ask something..."></textarea>
+<button>Generate</button>
+</div>
 
-  <aside class="drawer" id="aiDrawer">
-    <div class="drawer-header">
-      <div>
-        <div class="eyebrow" style="margin-bottom:8px;">AI Insights</div>
-        <h2 style="margin:0;font-size:22px;">Dashboard Copilot</h2>
-        <div class="muted" style="margin-top:6px;font-size:13px;">Text-first demo summary. Voice playback is optional.</div>
-      </div>
-      <button id="closeAi" class="secondary" style="padding:10px 12px;">Close</button>
-    </div>
+</div>
+</div>
 
-    <div class="drawer-body">
-      <div class="quick-grid">
-        <button class="secondary aiQuick" data-mode="summary">Summarize Current Dashboard</button>
-        <button class="secondary aiQuick" data-mode="risk">Show Backlog Risk</button>
-        <button class="secondary aiQuick" data-mode="sla">Explain SLA Concerns</button>
-        <button class="secondary aiQuick" data-mode="ops">What should management review first?</button>
-      </div>
+<button class="ask-ai-btn" onclick="toggleAI()">Ask AI</button>
 
-      <div class="ai-box">
-        <h3>Executive Summary</h3>
-        <div id="aiResponse" class="ai-text">Use the quick prompts or ask a custom question below.</div>
-      </div>
+<script>
 
-      <div class="ai-box">
-        <h3>Current Filter Context</h3>
-        <div id="aiContext" class="ai-text muted"></div>
-      </div>
-    </div>
+/* Charts */
+new Chart(document.getElementById('trend'),{
+type:'line',
+data:{
+labels:['Oct','Nov','Dec','Jan','Feb'],
+datasets:[
+{label:'Created',data:[10,15,20,18,14],borderColor:'blue'},
+{label:'Closed',data:[12,14,18,22,11],borderColor:'green'}
+]
+}
+});
 
-    <div class="drawer-footer">
-      <textarea id="aiQuestion" rows="3" placeholder="Ask something like: Why is backlog rising, or which product needs attention?"></textarea>
-      <div class="action-row">
-        <button id="askAiBtn">Generate Insight</button>
-        <button id="speakAiBtn" class="secondary">Read Aloud</button>
-      </div>
-      <div class="sr-note">In live mode, this panel can send the dashboard context JSON to your backend AI endpoint.</div>
-    </div>
-  </aside>
+new Chart(document.getElementById('sla'),{
+type:'doughnut',
+data:{
+datasets:[{
+data:[34,18],
+backgroundColor:['green','#eee']
+}]
+},
+options:{
+cutout:'75%',
+plugins:{legend:{display:false}}
+}
+});
 
-  <script>
-    const demoData = {
-      months: [
-        { month: 'Oct 2025', created: 14, closed: 18, pending: 40, acv: 11.2, live: 8, project: 4 },
-        { month: 'Nov 2025', created: 16, closed: 15, pending: 43, acv: 12.0, live: 9, project: 5 },
-        { month: 'Dec 2025', created: 21, closed: 19, pending: 47, acv: 13.4, live: 10, project: 5 },
-        { month: 'Jan 2026', created: 19, closed: 22, pending: 44, acv: 12.9, live: 10, project: 4 },
-        { month: 'Feb 2026', created: 17, closed: 14, pending: 49, acv: 14.6, live: 11, project: 4 },
-        { month: 'Mar 2026', created: 13, closed: 10, pending: 52, acv: 15.3, live: 9, project: 3 }
-      ],
-      severity: { Critical: 6, High: 18, Medium: 17, Low: 11 },
-      states: { 'New': 10, 'Active': 17, 'In Progress': 12, 'Resolved Pending Validation': 8, 'Blocked': 5 },
-      statusFactor: { 'Customer Live': 1, 'Project Phase': 0.65 },
-      severityFactor: { 'All': 1, 'Critical/High': 0.58, 'Medium': 0.32, 'Low': 0.18 },
-      products: [
-        { name: 'PaperSave', pending: 22, highCritical: 11, acv: 6.8, old: 9 },
-        { name: 'PairSoft Platform', pending: 14, highCritical: 7, acv: 4.1, old: 4 },
-        { name: 'Webiplex', pending: 9, highCritical: 3, acv: 2.6, old: 2 },
-        { name: 'PaperSave Agile', pending: 7, highCritical: 3, acv: 1.8, old: 2 }
-      ],
-      weekly: [
-        { week: 'W1', created: 5, closed: 6 },
-        { week: 'W2', created: 4, closed: 5 },
-        { week: 'W3', created: 6, closed: 4 },
-        { week: 'W4', created: 3, closed: 5 },
-        { week: 'W5', created: 5, closed: 4 },
-        { week: 'W6', created: 6, closed: 3 },
-        { week: 'W7', created: 4, closed: 3 },
-        { week: 'W8', created: 3, closed: 2 }
-      ],
-      sla: { met: 34, missed: 18 },
-      developers: [
-        { name: 'Aman', closed: 16 },
-        { name: 'Pooja', closed: 13 },
-        { name: 'Rakesh', closed: 10 },
-        { name: 'Neha', closed: 8 },
-        { name: 'Vikas', closed: 7 }
-      ],
-      customers: ['All Customers', 'Port Authority of Kansas City', 'The Thacher School', 'Cargo Carriers', 'Internal QA'],
-      statuses: ['All Statuses', 'Customer Live', 'Project Phase'],
-      severities: ['All', 'Critical/High', 'Medium', 'Low']
-    };
+/* AI */
+function toggleAI(){
+let el=document.getElementById('aiDrawer');
+el.style.display= el.style.display==='flex' ? 'none' : 'flex';
+}
 
-    const state = {
-      monthsToShow: 6,
-      product: 'All Products',
-      customer: 'All Customers',
-      status: 'All Statuses',
-      severityFocus: 'All',
-      theme: localStorage.getItem('defectDashboardTheme') || 'dark'
-    };
+</script>
 
-    const els = {
-      dateRange: document.getElementById('dateRange'),
-      productFilter: document.getElementById('productFilter'),
-      customerFilter: document.getElementById('customerFilter'),
-      statusFilter: document.getElementById('statusFilter'),
-      severityFocus: document.getElementById('severityFocus'),
-      themeSelect: document.getElementById('themeSelect'),
-      activeFilterSummary: document.getElementById('activeFilterSummary'),
-      refreshStamp: document.getElementById('refreshStamp'),
-      kpiGrid: document.getElementById('kpiGrid'),
-      trendChart: document.getElementById('trendChart'),
-      severityChart: document.getElementById('severityChart'),
-      stateChart: document.getElementById('stateChart'),
-      productChart: document.getElementById('productChart'),
-      weeklyChart: document.getElementById('weeklyChart'),
-      slaChart: document.getElementById('slaChart'),
-      developerChart: document.getElementById('developerChart'),
-      attentionTable: document.querySelector('#attentionTable tbody'),
-      aiDrawer: document.getElementById('aiDrawer'),
-      floatingAiBtn: document.getElementById('floatingAiBtn'),
-      openAi: document.getElementById('openAi'),
-      closeAi: document.getElementById('closeAi'),
-      aiResponse: document.getElementById('aiResponse'),
-      aiContext: document.getElementById('aiContext'),
-      aiQuestion: document.getElementById('aiQuestion'),
-      askAiBtn: document.getElementById('askAiBtn'),
-      speakAiBtn: document.getElementById('speakAiBtn')
-    };
-
-    function currencyLakhs(v) {
-      return '₹' + v.toFixed(1) + 'L';
-    }
-
-    function formatPct(v) {
-      return v.toFixed(1) + '%';
-    }
-
-    function sum(arr, key) {
-      return arr.reduce((a, b) => a + (typeof key === 'function' ? key(b) : b[key]), 0);
-    }
-
-    function getScaleFactor() {
-      let factor = 1;
-      if (state.product !== 'All Products') factor *= 0.46;
-      if (state.customer !== 'All Customers') factor *= 0.38;
-      if (state.status !== 'All Statuses') factor *= demoData.statusFactor[state.status] || 1;
-      factor *= demoData.severityFactor[state.severityFocus] || 1;
-      return factor;
-    }
-
-    function roundNonZero(n) {
-      return n <= 0 ? 0 : Math.max(1, Math.round(n));
-    }
-
-    function currentDataset() {
-      const factor = getScaleFactor();
-      const months = demoData.months.slice(-state.monthsToShow).map(m => ({
-        ...m,
-        created: roundNonZero(m.created * factor),
-        closed: roundNonZero(m.closed * factor),
-        pending: roundNonZero(m.pending * factor),
-        acv: +(m.acv * factor).toFixed(1),
-        live: roundNonZero(m.live * factor),
-        project: roundNonZero(m.project * factor)
-      }));
-
-      const severity = Object.fromEntries(Object.entries(demoData.severity).map(([k, v]) => [k, roundNonZero(v * factor)]));
-      const states = Object.fromEntries(Object.entries(demoData.states).map(([k, v]) => [k, roundNonZero(v * factor)]));
-      const products = demoData.products.map(p => ({
-        ...p,
-        pending: roundNonZero(p.pending * factor),
-        highCritical: roundNonZero(p.highCritical * factor),
-        acv: +(p.acv * factor).toFixed(1),
-        old: roundNonZero(p.old * factor)
-      }));
-      const weekly = demoData.weekly.map(w => ({
-        ...w,
-        created: roundNonZero(w.created * factor),
-        closed: roundNonZero(w.closed * factor)
-      }));
-      const sla = {
-        met: roundNonZero(demoData.sla.met * factor),
-        missed: roundNonZero(demoData.sla.missed * factor)
-      };
-      const developers = demoData.developers.map(d => ({ ...d, closed: roundNonZero(d.closed * factor) }));
-      return { factor, months, severity, states, products, weekly, sla, developers };
-    }
-
-    function cssVar(name) {
-      return getComputedStyle(document.body).getPropertyValue(name).trim();
-    }
-
-    function renderKpis(data) {
-      const latest = data.months[data.months.length - 1];
-      const prev = data.months[data.months.length - 2] || latest;
-      const pendingBacklog = latest.pending;
-      const totalClosed = sum(data.months, 'closed');
-      const createdThisMonth = latest.created;
-      const closedThisMonth = latest.closed;
-      const slaPct = (data.sla.met / Math.max(1, (data.sla.met + data.sla.missed))) * 100;
-      const acv = latest.acv;
-      const criticalHigh = (data.severity.Critical || 0) + (data.severity.High || 0);
-
-      const cards = [
-        { label: 'Pending Backlog', value: pendingBacklog, delta: `${pendingBacklog - prev.pending >= 0 ? '+' : ''}${pendingBacklog - prev.pending} vs prev month`, tone: pendingBacklog > prev.pending ? 'bad' : 'good' },
-        { label: 'Total Closed So Far', value: totalClosed, delta: `${closedThisMonth} closed in latest month`, tone: 'good' },
-        { label: 'Created This Month', value: createdThisMonth, delta: createdThisMonth > closedThisMonth ? 'Inflow above closure' : 'Inflow under control', tone: createdThisMonth > closedThisMonth ? 'warn' : 'good' },
-        { label: 'Closed This Month', value: closedThisMonth, delta: `${((closedThisMonth / Math.max(1, createdThisMonth)) * 100).toFixed(0)}% of created`, tone: closedThisMonth >= createdThisMonth ? 'good' : 'warn' },
-        { label: '4-Week Target Met', value: formatPct(slaPct), delta: `${data.sla.met} met / ${data.sla.missed} missed`, tone: slaPct >= 70 ? 'good' : slaPct >= 50 ? 'warn' : 'bad' },
-        { label: 'Pending ACV Impact', value: currencyLakhs(acv), delta: `${criticalHigh} high-impact items`, tone: criticalHigh > 15 ? 'bad' : 'warn' }
-      ];
-
-      els.kpiGrid.innerHTML = cards.map(card => `
-        <article class="panel kpi-card">
-          <div>
-            <div class="kpi-label">${card.label}</div>
-            <div class="kpi-value">${card.value}</div>
-          </div>
-          <div class="delta ${card.tone}">${card.delta}</div>
-        </article>
-      `).join('');
-    }
-
-    function clearSvg(svg) {
-      svg.innerHTML = '';
-      const w = svg.clientWidth || 600;
-      const h = svg.clientHeight || 240;
-      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-      return { w, h };
-    }
-
-    function addText(svg, x, y, text, opts = {}) {
-      const node = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      node.setAttribute('x', x);
-      node.setAttribute('y', y);
-      node.setAttribute('fill', opts.fill || cssVar('--muted'));
-      node.setAttribute('font-size', opts.size || 11);
-      node.setAttribute('font-weight', opts.weight || 600);
-      node.setAttribute('text-anchor', opts.anchor || 'start');
-      node.textContent = text;
-      svg.appendChild(node);
-      return node;
-    }
-
-    function drawAxes(svg, left, top, width, height, max, ticks = 4) {
-      for (let i = 0; i <= ticks; i++) {
-        const y = top + (height / ticks) * i;
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', left);
-        line.setAttribute('x2', left + width);
-        line.setAttribute('y1', y);
-        line.setAttribute('y2', y);
-        line.setAttribute('stroke', cssVar('--grid'));
-        line.setAttribute('stroke-width', '1');
-        svg.appendChild(line);
-        const val = Math.round(max - (max / ticks) * i);
-        addText(svg, left - 8, y + 4, val, { anchor: 'end' });
-      }
-    }
-
-    function renderMultiLine(svg, labels, series) {
-      const { w, h } = clearSvg(svg);
-      const left = 36, right = 12, top = 12, bottom = 28;
-      const width = w - left - right, height = h - top - bottom;
-      const max = Math.max(...series.flatMap(s => s.values), 5);
-      drawAxes(svg, left, top, width, height, max);
-
-      const stepX = labels.length > 1 ? width / (labels.length - 1) : width;
-      series.forEach(s => {
-        let d = '';
-        s.values.forEach((v, i) => {
-          const x = left + stepX * i;
-          const y = top + height - (v / max) * height;
-          d += (i === 0 ? 'M' : ' L') + x + ' ' + y;
-          const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 4);
-          c.setAttribute('fill', s.color);
-          svg.appendChild(c);
-        });
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', d);
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke', s.color);
-        path.setAttribute('stroke-width', '3');
-        path.setAttribute('stroke-linecap', 'round');
-        path.setAttribute('stroke-linejoin', 'round');
-        svg.appendChild(path);
-      });
-
-      labels.forEach((label, i) => {
-        addText(svg, left + stepX * i, h - 8, label, { anchor: 'middle' });
-      });
-    }
-
-    function renderBars(svg, items, opts = {}) {
-      const { w, h } = clearSvg(svg);
-      const horizontal = !!opts.horizontal;
-      const color = opts.color || cssVar('--accent');
-      if (horizontal) {
-        const left = 100, right = 18, top = 12, bottom = 14;
-        const width = w - left - right, rowH = (h - top - bottom) / items.length;
-        const max = Math.max(...items.map(i => i.value), 1);
-        items.forEach((it, idx) => {
-          const y = top + idx * rowH + rowH * 0.2;
-          const bh = rowH * 0.58;
-          const bw = (it.value / max) * width;
-          const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          rect.setAttribute('x', left);
-          rect.setAttribute('y', y);
-          rect.setAttribute('width', bw);
-          rect.setAttribute('height', bh);
-          rect.setAttribute('rx', 8);
-          rect.setAttribute('fill', Array.isArray(color) ? color[idx % color.length] : color);
-          svg.appendChild(rect);
-          addText(svg, left - 10, y + bh / 2 + 4, it.label, { anchor: 'end' });
-          addText(svg, left + bw + 8, y + bh / 2 + 4, it.value, { fill: cssVar('--text'), weight: 700 });
-        });
-      } else {
-        const left = 24, right = 12, top = 12, bottom = 30;
-        const width = w - left - right, height = h - top - bottom;
-        const max = Math.max(...items.map(i => i.value), 1);
-        const gap = 12;
-        const barW = (width - gap * (items.length - 1)) / items.length;
-        drawAxes(svg, left, top, width, height, max);
-        items.forEach((it, idx) => {
-          const x = left + idx * (barW + gap);
-          const bh = (it.value / max) * height;
-          const y = top + height - bh;
-          const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-          rect.setAttribute('x', x);
-          rect.setAttribute('y', y);
-          rect.setAttribute('width', barW);
-          rect.setAttribute('height', bh);
-          rect.setAttribute('rx', 8);
-          rect.setAttribute('fill', Array.isArray(color) ? color[idx % color.length] : color);
-          svg.appendChild(rect);
-          addText(svg, x + barW / 2, h - 8, it.label, { anchor: 'middle' });
-          addText(svg, x + barW / 2, y - 6, it.value, { anchor: 'middle', fill: cssVar('--text') });
-        });
-      }
-    }
-
-    function renderDualBars(svg, labels, a, b) {
-      const { w, h } = clearSvg(svg);
-      const left = 36, right = 12, top = 12, bottom = 34;
-      const width = w - left - right, height = h - top - bottom;
-      const max = Math.max(...a, ...b, 1);
-      drawAxes(svg, left, top, width, height, max);
-      const groupW = width / labels.length;
-      const barW = Math.min(24, groupW * 0.28);
-      labels.forEach((label, i) => {
-        const center = left + groupW * i + groupW / 2;
-        const x1 = center - barW - 4;
-        const x2 = center + 4;
-        const h1 = (a[i] / max) * height;
-        const h2 = (b[i] / max) * height;
-        const r1 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        r1.setAttribute('x', x1); r1.setAttribute('y', top + height - h1); r1.setAttribute('width', barW); r1.setAttribute('height', h1); r1.setAttribute('rx', 6); r1.setAttribute('fill', cssVar('--accent'));
-        svg.appendChild(r1);
-        const r2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-        r2.setAttribute('x', x2); r2.setAttribute('y', top + height - h2); r2.setAttribute('width', barW); r2.setAttribute('height', h2); r2.setAttribute('rx', 6); r2.setAttribute('fill', cssVar('--success'));
-        svg.appendChild(r2);
-        addText(svg, center, h - 8, label, { anchor: 'middle' });
-      });
-    }
-
-    function renderSla(svg, met, missed) {
-      const { w, h } = clearSvg(svg);
-      const total = Math.max(met + missed, 1);
-      const pct = met / total;
-      const cx = w / 2;
-      const cy = h / 2 + 6;
-      const r = Math.min(w, h) * 0.30;
-      const stroke = 12;
-      const circumference = 2 * Math.PI * r;
-
-      const bg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      bg.setAttribute('cx', cx); bg.setAttribute('cy', cy); bg.setAttribute('r', r);
-      bg.setAttribute('fill', 'none'); bg.setAttribute('stroke', cssVar('--grid')); bg.setAttribute('stroke-width', stroke);
-      svg.appendChild(bg);
-
-      const fg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      fg.setAttribute('cx', cx); fg.setAttribute('cy', cy); fg.setAttribute('r', r);
-      fg.setAttribute('fill', 'none'); fg.setAttribute('stroke', cssVar('--success')); fg.setAttribute('stroke-width', stroke);
-      fg.setAttribute('stroke-linecap', 'round');
-      fg.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
-      fg.setAttribute('stroke-dasharray', `${circumference * pct} ${circumference}`);
-      svg.appendChild(fg);
-
-      addText(svg, w - 20, 22, `Met: ${met}`, { anchor: 'end', fill: cssVar('--success'), size: 12, weight: 700 });
-      addText(svg, w - 20, 40, `Missed: ${missed}`, { anchor: 'end', fill: cssVar('--danger'), size: 12, weight: 700 });
-      addText(svg, cx, cy + 6, Math.round(pct * 100) + '%', { anchor: 'middle', fill: cssVar('--text'), size: 32, weight: 800 });
-    }
-
-    function renderTable(products) {
-      els.attentionTable.innerHTML = products.map(p => `
-        <tr>
-          <td>${p.name}</td>
-          <td>${p.pending}</td>
-          <td>${p.highCritical}</td>
-          <td>${currencyLakhs(p.acv)}</td>
-          <td>${p.old}</td>
-        </tr>
-      `).join('');
-    }
-
-    function renderCharts(data) {
-      renderMultiLine(els.trendChart, data.months.map(m => m.month.replace(' 20', ' ')), [
-        { values: data.months.map(m => m.created), color: cssVar('--accent') },
-        { values: data.months.map(m => m.closed), color: cssVar('--success') }
-      ]);
-      document.getElementById('trendFoot').textContent = `Pending latest month: ${data.months[data.months.length - 1].pending}`;
-
-      renderBars(els.severityChart, Object.entries(data.severity).map(([label, value]) => ({ label, value })), { color: [cssVar('--danger'), cssVar('--warning'), cssVar('--accent'), cssVar('--success')] });
-      document.getElementById('severityFoot').textContent = `${Object.values(data.severity).reduce((a,b)=>a+b,0)} open items`;
-
-      renderBars(els.stateChart, Object.entries(data.states).map(([label, value]) => ({ label: label.replace('Resolved Pending Validation','R.P.V.'), value })), { horizontal: true, color: cssVar('--accent-2') });
-      document.getElementById('stateFoot').textContent = `Top state: ${Object.entries(data.states).sort((a,b)=>b[1]-a[1])[0][0]}`;
-
-      renderBars(els.productChart, data.products.map(p => ({ label: p.name.replace('PairSoft Platform','Platform'), value: p.pending })), { horizontal: true, color: [cssVar('--accent'), cssVar('--accent-2'), cssVar('--warning'), cssVar('--success')] });
-      document.getElementById('productFoot').textContent = `Highest backlog: ${data.products.slice().sort((a,b)=>b.pending-a.pending)[0].name}`;
-
-      renderDualBars(els.weeklyChart, data.weekly.map(w => w.week), data.weekly.map(w => w.created), data.weekly.map(w => w.closed));
-      document.getElementById('weeklyFoot').textContent = `8-week closure total: ${sum(data.weekly, 'closed')}`;
-
-      renderSla(els.slaChart, data.sla.met, data.sla.missed);
-      document.getElementById('slaFoot').textContent = `${formatPct((data.sla.met / Math.max(1, data.sla.met + data.sla.missed)) * 100)} met within 4 weeks`;
-
-      renderBars(els.developerChart, data.developers.map(d => ({ label: d.name, value: d.closed })), { horizontal: true, color: cssVar('--success') });
-      document.getElementById('developerFoot').textContent = `Top closer: ${data.developers.slice().sort((a,b)=>b.closed-a.closed)[0].name}`;
-
-      renderTable(data.products.slice().sort((a,b)=>b.pending-a.pending));
-    }
-
-    function buildAiSummary(mode = 'summary', question = '') {
-      const data = currentDataset();
-      const latest = data.months[data.months.length - 1];
-      const prev = data.months[data.months.length - 2] || latest;
-      const severitySorted = Object.entries(data.severity).sort((a,b)=>b[1]-a[1]);
-      const topProduct = data.products.slice().sort((a,b)=>b.pending-a.pending)[0];
-      const topDeveloper = data.developers.slice().sort((a,b)=>b.closed-a.closed)[0];
-      const slaPct = (data.sla.met / Math.max(1, data.sla.met + data.sla.missed)) * 100;
-
-      const context = `Range: Last ${state.monthsToShow} months\nProduct: ${state.product}\nCustomer: ${state.customer}\nCustomer Status: ${state.status}\nSeverity Focus: ${state.severityFocus}`;
-      els.aiContext.textContent = context;
-
-      if (mode === 'risk') {
-        return `Backlog risk is currently led by ${topProduct.name}, which carries ${topProduct.pending} pending items and ${topProduct.highCritical} high/critical cases. The largest severity bucket is ${severitySorted[0][0]} with ${severitySorted[0][1]} open items. Compared to the previous month, pending backlog moved from ${prev.pending} to ${latest.pending}, which ${latest.pending > prev.pending ? 'shows pressure building faster than desired.' : 'suggests backlog is being contained.'}`;
-      }
-      if (mode === 'sla') {
-        return `Current 4-week target compliance is ${formatPct(slaPct)}. That means ${data.sla.met} items are within target while ${data.sla.missed} are missing the target. This is ${slaPct < 60 ? 'an area needing management attention, especially for older pending work.' : 'reasonably healthy, though older items should still be reviewed.'}`;
-      }
-      if (mode === 'ops') {
-        return `Management should first review ${topProduct.name}, because it has the highest backlog and ACV exposure. Second, review the highest severity bucket (${severitySorted[0][0]}). Third, support the top closer ${topDeveloper.name} and check whether closure performance can be replicated across the rest of the team.`;
-      }
-      if (question) {
-        const q = question.toLowerCase();
-        if (q.includes('why') && q.includes('backlog')) {
-          return `Backlog is rising mainly because recent created volume (${latest.created}) is ${latest.created > latest.closed ? 'higher than' : 'close to'} latest closed volume (${latest.closed}). The concentration in ${topProduct.name} and the heavy ${severitySorted[0][0]} bucket suggest that a few focused problem areas are driving overall pressure.`;
-        }
-        if (q.includes('product')) {
-          return `${topProduct.name} needs the most attention right now. It has ${topProduct.pending} pending defects, ${topProduct.highCritical} high/critical items, and an estimated ACV impact of ${currencyLakhs(topProduct.acv)} in this demo snapshot.`;
-        }
-        if (q.includes('developer') || q.includes('team')) {
-          return `${topDeveloper.name} currently leads closures with ${topDeveloper.closed} closed items in the selected view. A practical next step is to compare the categories handled by ${topDeveloper.name} against lower-closing team members and identify workflow differences.`;
-        }
-        return `Based on the current dashboard view, the most important themes are backlog concentration in ${topProduct.name}, SLA compliance at ${formatPct(slaPct)}, and a latest month comparison of ${latest.created} created versus ${latest.closed} closed. In live mode, this answer can become much more precise by sending the exact dashboard context JSON to your AI endpoint.`;
-      }
-      return `Current dashboard view shows ${latest.pending} pending items, ${latest.closed} closed in the latest month, and ${formatPct(slaPct)} 4-week target compliance. The biggest open-risk area is ${topProduct.name}. The largest severity bucket is ${severitySorted[0][0]}. Overall, the dashboard suggests ${latest.created > latest.closed ? 'inflow is slightly outpacing closure and backlog needs attention.' : 'closure performance is helping keep the backlog under control.'}`;
-    }
-
-    function renderAll() {
-      const data = currentDataset();
-      renderKpis(data);
-      renderCharts(data);
-      els.activeFilterSummary.textContent = `Filters: ${state.product} • ${state.customer} • Last ${state.monthsToShow} Months`;
-      const now = new Date();
-      els.refreshStamp.textContent = `Last refreshed: ${now.toLocaleString()}`;
-      els.aiResponse.textContent = buildAiSummary();
-    }
-
-    function setupFilters() {
-      const productOptions = ['All Products', ...demoData.products.map(p => p.name)];
-      els.productFilter.innerHTML = productOptions.map(v => `<option>${v}</option>`).join('');
-      els.customerFilter.innerHTML = demoData.customers.map(v => `<option>${v}</option>`).join('');
-      els.statusFilter.innerHTML = demoData.statuses.map(v => `<option>${v}</option>`).join('');
-      els.severityFocus.innerHTML = demoData.severities.map(v => `<option>${v}</option>`).join('');
-
-      els.themeSelect.value = state.theme;
-      document.body.setAttribute('data-theme', state.theme);
-    }
-
-    function applyFilters() {
-      state.monthsToShow = parseInt(els.dateRange.value, 10);
-      state.product = els.productFilter.value;
-      state.customer = els.customerFilter.value;
-      state.status = els.statusFilter.value;
-      state.severityFocus = els.severityFocus.value;
-      renderAll();
-    }
-
-    function resetFilters() {
-      state.monthsToShow = 6;
-      state.product = 'All Products';
-      state.customer = 'All Customers';
-      state.status = 'All Statuses';
-      state.severityFocus = 'All';
-      els.dateRange.value = '6';
-      els.productFilter.value = 'All Products';
-      els.customerFilter.value = 'All Customers';
-      els.statusFilter.value = 'All Statuses';
-      els.severityFocus.value = 'All';
-      renderAll();
-    }
-
-    function openAi() { els.aiDrawer.classList.add('open'); }
-    function closeAi() { els.aiDrawer.classList.remove('open'); }
-
-    function applyTheme(theme) {
-      state.theme = theme;
-      document.body.setAttribute('data-theme', theme);
-      localStorage.setItem('defectDashboardTheme', theme);
-      setTimeout(renderAll, 40);
-    }
-
-    document.getElementById('applyFilters').addEventListener('click', applyFilters);
-    document.getElementById('resetFilters').addEventListener('click', resetFilters);
-    els.themeSelect.addEventListener('change', e => applyTheme(e.target.value));
-    els.openAi.addEventListener('click', openAi);
-    els.floatingAiBtn.addEventListener('click', openAi);
-    els.closeAi.addEventListener('click', closeAi);
-
-    document.querySelectorAll('.aiQuick').forEach(btn => {
-      btn.addEventListener('click', () => {
-        els.aiResponse.textContent = buildAiSummary(btn.dataset.mode);
-      });
-    });
-
-    els.askAiBtn.addEventListener('click', () => {
-      els.aiResponse.textContent = buildAiSummary('custom', els.aiQuestion.value.trim());
-      openAi();
-    });
-
-    els.speakAiBtn.addEventListener('click', () => {
-      const text = els.aiResponse.textContent.trim();
-      if (!('speechSynthesis' in window) || !text) {
-        alert('Speech synthesis is not available in this browser.');
-        return;
-      }
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.rate = 1;
-      utter.pitch = 1;
-      window.speechSynthesis.speak(utter);
-    });
-
-    window.addEventListener('resize', () => renderAll());
-
-    setupFilters();
-    resetFilters();
-  </script>
 </body>
 </html>
