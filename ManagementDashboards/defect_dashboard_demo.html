@@ -1,212 +1,1295 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Defect Operations Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Defect Operations Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f3efe7;
+      --surface: #fbf8f2;
+      --surface-2: #f7f2e8;
+      --card: #fffaf2;
+      --card-2: #f5efe3;
+      --text: #433225;
+      --muted: #8a735b;
+      --line: #e4d8c7;
+      --shadow: 0 10px 30px rgba(90, 68, 36, 0.08);
+      --accent: #c69624;
+      --accent-2: #7d84f3;
+      --success: #2f9662;
+      --danger: #d45a52;
+      --warning: #d88c00;
+      --pill: #efe3cc;
+      --overlay: rgba(40, 27, 8, 0.18);
+    }
 
-<style>
-html, body {
-  margin:0;
-  padding:0;
-  font-family:Segoe UI, sans-serif;
-  background:#f5f3ef;
-  overflow-x:hidden; /* remove horizontal scroll */
-}
+    [data-theme="dark"] {
+      --bg: #101722;
+      --surface: #141d2a;
+      --surface-2: #182334;
+      --card: #192434;
+      --card-2: #172131;
+      --text: #ecf2ff;
+      --muted: #97aac8;
+      --line: #26354d;
+      --shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+      --accent: #f2b84b;
+      --accent-2: #7ba7ff;
+      --success: #38b980;
+      --danger: #ff7b72;
+      --warning: #ffbf4d;
+      --pill: #223149;
+      --overlay: rgba(0, 0, 0, 0.45);
+    }
 
-/* container */
-.dashboard {
-  max-width:1200px;
-  margin:0 auto;
-  padding:20px 16px 40px; /* extra top padding */
-}
+    [data-theme="light"] {
+      --bg: #eef3f8;
+      --surface: #f8fbff;
+      --surface-2: #eef5fb;
+      --card: #ffffff;
+      --card-2: #f5f9fd;
+      --text: #1e3350;
+      --muted: #5f7795;
+      --line: #d6e3f0;
+      --shadow: 0 10px 30px rgba(35, 70, 110, 0.08);
+      --accent: #2f83f1;
+      --accent-2: #6ea8ff;
+      --success: #20a36a;
+      --danger: #e05d5d;
+      --warning: #d69623;
+      --pill: #e9f1fb;
+      --overlay: rgba(40, 70, 120, 0.15);
+    }
 
-/* grid */
-.grid {
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:16px;
-}
+    [data-theme="blue"] {
+      --bg: #e9eff8;
+      --surface: #f5f8fe;
+      --surface-2: #edf3fd;
+      --card: #fbfdff;
+      --card-2: #f2f7ff;
+      --text: #233b66;
+      --muted: #627da6;
+      --line: #d8e1ef;
+      --shadow: 0 12px 28px rgba(38, 70, 130, 0.08);
+      --accent: #4d7cff;
+      --accent-2: #7ca9ff;
+      --success: #2f9c78;
+      --danger: #dc6666;
+      --warning: #d9a227;
+      --pill: #e7eefc;
+      --overlay: rgba(30, 60, 120, 0.18);
+    }
 
-/* card */
-.card {
-  background:#fff;
-  border-radius:14px;
-  padding:16px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.05);
-}
+    * { box-sizing: border-box; }
 
-/* charts */
-canvas {
-  width:100% !important;
-  height:250px !important;
-}
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Segoe UI, Inter, Arial, sans-serif;
+      min-height: 100%;
+      overflow-x: hidden;
+    }
 
-/* SLA */
-.sla-box {
-  position:relative;
-  height:260px;
-}
+    body {
+      padding-top: 14px;
+    }
 
-.sla-summary {
-  position:absolute;
-  top:10px;
-  right:16px;
-  font-size:13px;
-  text-align:right;
-}
+    .page {
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 8px 14px 80px;
+    }
 
-.sla-summary .met {color:#1a7f37;font-weight:600;}
-.sla-summary .missed {color:#d9534f;font-weight:600;}
+    .top-gap {
+      height: 8px;
+    }
 
-.sla-chart {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  height:100%;
-}
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 14px;
+      align-items: stretch;
+    }
 
-.sla-center {
-  position:absolute;
-  font-size:34px;
-  font-weight:700;
-}
+    .panel,
+    .card {
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
 
-/* AI drawer */
-.ai-drawer {
-  position:fixed;
-  right:0;
-  top:0;
-  width:320px;
-  height:100vh;
-  background:#fff;
-  box-shadow:-2px 0 10px rgba(0,0,0,0.1);
-  display:none;
-  flex-direction:column;
-  z-index:999;
-}
+    .panel {
+      padding: 18px 18px 16px;
+    }
 
-.ai-content {
-  display:flex;
-  flex-direction:column;
-  height:100%;
-  padding:16px;
-}
+    .title-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--pill);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
 
-.ai-input {
-  margin-top:auto;
-}
+    h1 {
+      margin: 0 0 10px;
+      font-size: 22px;
+      line-height: 1.15;
+    }
 
-textarea {
-  width:100%;
-  height:90px; /* fixed height fix */
-  resize:none;
-}
+    .subtext {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
 
-/* button */
-.ask-btn {
-  position:fixed;
-  bottom:16px;
-  right:16px;
-  background:#6c63ff;
-  color:#fff;
-  border:none;
-  padding:10px 16px;
-  border-radius:8px;
-  cursor:pointer;
-  z-index:999;
-}
+    .meta-row, .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
 
-</style>
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+      background: color-mix(in srgb, var(--card) 60%, transparent);
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    select, .btn, textarea {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+    }
+
+    select {
+      padding: 12px 14px;
+      min-height: 46px;
+      outline: none;
+    }
+
+    .actions {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 2px;
+    }
+
+    .btn {
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+      box-shadow: none;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn.primary {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: white;
+      border: none;
+    }
+
+    .btn.ghost {
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .helper {
+      grid-column: 1 / -1;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: -2px;
+    }
+
+    .kpi-grid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .kpi-card {
+      padding: 14px 14px 12px;
+      min-height: 110px;
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .kpi-foot {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .danger { color: var(--danger); }
+    .success { color: var(--success); }
+    .warning { color: var(--warning); }
+
+    .main-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .span-12 { grid-column: span 12; }
+    .span-8 { grid-column: span 8; }
+    .span-6 { grid-column: span 6; }
+    .span-4 { grid-column: span 4; }
+
+    .card {
+      padding: 16px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .card-sub {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .tag {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      background: var(--pill);
+      border: 1px solid var(--line);
+    }
+
+    .chart-shell {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: color-mix(in srgb, var(--surface) 80%, transparent);
+      padding: 12px;
+      min-height: 290px;
+      position: relative;
+    }
+
+    .compact-shell {
+      min-height: 240px;
+    }
+
+    .footer-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .footer-line .pill {
+      padding: 8px 12px;
+      background: var(--pill);
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    .bar-list {
+      display: grid;
+      gap: 14px;
+      padding: 10px 6px 6px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 96px 1fr 36px;
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .bar-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .bar-track {
+      position: relative;
+      height: 22px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--line) 60%, transparent);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      border-radius: 999px;
+    }
+
+    .bar-value {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .table-wrap {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: color-mix(in srgb, var(--surface) 82%, transparent);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th, td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .02em;
+      text-transform: none;
+      font-weight: 800;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .sla-shell {
+      position: relative;
+      min-height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: 18px;
+    }
+
+    .sla-summary {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      text-align: right;
+      font-size: 12px;
+      line-height: 1.5;
+      font-weight: 800;
+    }
+
+    .donut-wrap {
+      position: relative;
+      width: 210px;
+      height: 210px;
+      margin-top: 8px;
+    }
+
+    .donut-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      font-weight: 900;
+      pointer-events: none;
+    }
+
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+      z-index: 998;
+    }
+
+    .drawer-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .ai-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 340px;
+      max-width: 92vw;
+      height: 100vh;
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border-left: 1px solid var(--line);
+      box-shadow: -12px 0 28px rgba(0,0,0,0.12);
+      transform: translateX(100%);
+      transition: transform .22s ease;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ai-drawer.open { transform: translateX(0); }
+
+    .drawer-head {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .drawer-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .drawer-title h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .icon-btn {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 12px;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .drawer-body {
+      padding: 14px 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .insight-box {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: color-mix(in srgb, var(--surface) 86%, transparent);
+      padding: 12px 13px;
+    }
+
+    .insight-head {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .insight-text {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text);
+    }
+
+    .prompt-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .prompt-chip {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 12px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .drawer-foot {
+      padding: 12px 16px 16px;
+      border-top: 1px solid var(--line);
+      background: color-mix(in srgb, var(--card) 85%, transparent);
+      position: sticky;
+      bottom: 0;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      max-height: 90px;
+      padding: 12px 13px;
+      resize: none;
+      outline: none;
+    }
+
+    .drawer-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mini-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .fab {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 997;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 18px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: white;
+      font-weight: 800;
+      box-shadow: 0 12px 26px rgba(0,0,0,0.15);
+      cursor: pointer;
+    }
+
+    @media (max-width: 1120px) {
+      .page { max-width: 1080px; }
+      .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .hero-grid { grid-template-columns: 1fr; }
+      .span-8, .span-6, .span-4 { grid-column: span 12; }
+    }
+
+    @media (max-width: 760px) {
+      .page { padding-inline: 10px; }
+      .filters { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .bar-row { grid-template-columns: 82px 1fr 30px; }
+      .donut-wrap { width: 180px; height: 180px; }
+      .fab { right: 12px; bottom: 12px; }
+    }
+  </style>
 </head>
+<body data-theme="warm">
+  <div class="page">
+    <div class="top-gap"></div>
 
-<body>
+    <section class="hero-grid">
+      <div class="panel">
+        <div class="title-badge">Demo Mode • Frontend Prototype</div>
+        <h1>Defect Operations Dashboard</h1>
+        <div class="subtext">
+          Compact single-file dashboard designed for Azure DevOps web widgets. Demo mode is built in, theme switching is live, and the layout is tightened to avoid horizontal scrolling inside 7–8 tile widgets.
+        </div>
+        <div class="meta-row" id="metaRow"></div>
+        <div class="chip-row" style="margin-top:10px;">
+          <div class="chip">Theme switching enabled</div>
+          <div class="chip">AI insight drawer included</div>
+        </div>
+      </div>
 
-<div class="dashboard">
+      <div class="panel">
+        <div class="filters">
+          <div class="field">
+            <label>Date Range</label>
+            <select id="dateRange">
+              <option>Last 6 Months</option>
+              <option>Last 3 Months</option>
+              <option>This Month</option>
+              <option>Last 12 Months</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Theme</label>
+            <select id="themeSelect">
+              <option value="warm">Warm BI</option>
+              <option value="dark">Dark Classic</option>
+              <option value="light">Light Professional</option>
+              <option value="blue">Blue Executive</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Product</label>
+            <select id="productFilter"></select>
+          </div>
+          <div class="field">
+            <label>Customer</label>
+            <select id="customerFilter"></select>
+          </div>
+          <div class="field">
+            <label>Customer Status</label>
+            <select id="statusFilter"></select>
+          </div>
+          <div class="field">
+            <label>Severity Focus</label>
+            <select id="severityFilter"></select>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="applyBtn">Apply Demo Filters</button>
+            <button class="btn ghost" id="resetBtn">Reset</button>
+            <button class="btn ghost" id="openAiBtn">Open AI Insights</button>
+          </div>
+          <div class="helper">Tip: the current prototype updates all widgets locally without any backend.</div>
+        </div>
+      </div>
+    </section>
 
-<h2>Defect Operations Dashboard</h2>
+    <section class="kpi-grid" id="kpiGrid"></section>
 
-<div class="grid">
+    <section class="main-grid">
+      <article class="card span-12">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Created vs Closed Trend</div>
+            <div class="card-sub">Monthly inflow versus closure movement for the selected period.</div>
+          </div>
+          <div class="tag">Trend</div>
+        </div>
+        <div class="chart-shell"><canvas id="trendChart"></canvas></div>
+        <div class="footer-line"><span>Demo monthly dataset</span><span class="pill" id="trendFoot"></span></div>
+      </article>
 
-<!-- Trend -->
-<div class="card">
-<h3>Created vs Closed</h3>
-<canvas id="trend"></canvas>
-</div>
+      <article class="card span-4">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Pending by Severity</div>
+            <div class="card-sub">Active backlog risk split.</div>
+          </div>
+          <div class="tag">Risk</div>
+        </div>
+        <div class="chart-shell compact-shell"><canvas id="severityChart"></canvas></div>
+        <div class="footer-line"><span id="severityFoot"></span><span class="pill">Backlog</span></div>
+      </article>
 
-<!-- SLA -->
-<div class="card sla-box">
-<h3>4-Week Target Compliance</h3>
+      <article class="card span-4">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Pending by State</div>
+            <div class="card-sub">Where open work is sitting operationally.</div>
+          </div>
+          <div class="tag">Flow</div>
+        </div>
+        <div class="chart-shell compact-shell"><canvas id="stateChart"></canvas></div>
+        <div class="footer-line"><span id="stateFoot"></span><span class="pill">Current open items</span></div>
+      </article>
 
-<div class="sla-summary">
-<div class="met">Met: 34</div>
-<div class="missed">Missed: 18</div>
-</div>
+      <article class="card span-4">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Pending by Product</div>
+            <div class="card-sub">Backlog concentration across products.</div>
+          </div>
+          <div class="tag">Products</div>
+        </div>
+        <div class="chart-shell compact-shell" style="display:flex; align-items:center;">
+          <div class="bar-list" id="productBars" style="width:100%;"></div>
+        </div>
+        <div class="footer-line"><span id="productFoot"></span><span class="pill">Top products</span></div>
+      </article>
 
-<div class="sla-chart">
-<canvas id="sla"></canvas>
-<div class="sla-center">65%</div>
-</div>
+      <article class="card span-4">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Weekly Throughput</div>
+            <div class="card-sub">Recent weekly created and closed trend.</div>
+          </div>
+          <div class="tag">Weekly</div>
+        </div>
+        <div class="chart-shell compact-shell"><canvas id="weeklyChart"></canvas></div>
+        <div class="footer-line"><span id="weeklyFoot"></span><span class="pill">Last 8 weeks</span></div>
+      </article>
 
-</div>
+      <article class="card span-4">
+        <div class="card-header">
+          <div>
+            <div class="card-title">4-Week Target Compliance</div>
+            <div class="card-sub">Met target versus missed target.</div>
+          </div>
+          <div class="tag">SLA</div>
+        </div>
+        <div class="chart-shell compact-shell sla-shell">
+          <div class="sla-summary"><div class="success" id="metLabel"></div><div class="danger" id="missedLabel"></div></div>
+          <div class="donut-wrap">
+            <canvas id="slaChart"></canvas>
+            <div class="donut-center" id="slaCenter"></div>
+          </div>
+        </div>
+        <div class="footer-line"><span id="slaFoot"></span><span class="pill">Current filter view</span></div>
+      </article>
 
-</div>
+      <article class="card span-6">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Developer Closures</div>
+            <div class="card-sub">Demo monthly closure distribution by developer.</div>
+          </div>
+          <div class="tag">Ownership</div>
+        </div>
+        <div class="chart-shell compact-shell" style="display:flex; align-items:center;">
+          <div class="bar-list" id="developerBars" style="width:100%;"></div>
+        </div>
+        <div class="footer-line"><span id="devFoot"></span><span class="pill">Selected period</span></div>
+      </article>
 
-</div>
+      <article class="card span-6">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Operational Attention Table</div>
+            <div class="card-sub">Priority areas based on backlog volume, ACV impact, and aging.</div>
+          </div>
+          <div class="tag">Review</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Pending</th>
+                <th>High/Critical</th>
+                <th>ACV Impact</th>
+                <th>Old &gt; 8w</th>
+              </tr>
+            </thead>
+            <tbody id="attentionTable"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+  </div>
 
-<!-- AI -->
-<div class="ai-drawer" id="aiDrawer">
-<div class="ai-content">
-<h3>AI Insights</h3>
+  <div class="drawer-overlay" id="drawerOverlay"></div>
 
-<div class="ai-input">
-<textarea placeholder="Ask something..."></textarea>
-<br><br>
-<button>Generate Insight</button>
-</div>
+  <aside class="ai-drawer" id="aiDrawer">
+    <div class="drawer-head">
+      <div class="drawer-title">
+        <h3>AI Insights</h3>
+        <button class="icon-btn" id="closeDrawerBtn">×</button>
+      </div>
+      <div class="subtext" style="margin:0; font-size:12px;">Summarizes the current dashboard view using the selected demo filters.</div>
+    </div>
 
-</div>
-</div>
+    <div class="drawer-body">
+      <div class="insight-box">
+        <div class="insight-head">Executive Summary</div>
+        <div class="insight-text" id="summaryText"></div>
+      </div>
+      <div class="insight-box">
+        <div class="insight-head">Risks & Alerts</div>
+        <div class="insight-text" id="riskText"></div>
+      </div>
+      <div class="insight-box">
+        <div class="insight-head">Recommended Actions</div>
+        <div class="insight-text" id="actionText"></div>
+      </div>
+      <div class="insight-box">
+        <div class="insight-head">Quick Prompts</div>
+        <div class="prompt-grid">
+          <button class="prompt-chip">Summarize current dashboard</button>
+          <button class="prompt-chip">What is the current backlog risk?</button>
+          <button class="prompt-chip">Which product needs the most attention?</button>
+          <button class="prompt-chip">Explain created vs closed trend</button>
+        </div>
+      </div>
+    </div>
 
-<button class="ask-btn" onclick="toggleAI()">Ask AI</button>
+    <div class="drawer-foot">
+      <textarea id="aiPrompt" placeholder="Ask something like: Why is backlog rising, or which product needs attention?"></textarea>
+      <div class="drawer-actions">
+        <button class="btn primary" id="generateBtn">Generate Insight</button>
+        <button class="btn ghost" id="readBtn">Read Aloud</button>
+      </div>
+      <div class="mini-note">In live mode, this panel can send the dashboard context JSON to your backend AI endpoint.</div>
+    </div>
+  </aside>
 
-<script>
+  <button class="fab" id="fabBtn">Ask AI</button>
 
-/* Trend Chart */
-new Chart(document.getElementById('trend'), {
-  type:'line',
-  data:{
-    labels:['Oct','Nov','Dec','Jan','Feb'],
-    datasets:[
-      {label:'Created',data:[10,15,20,18,14],borderColor:'#007bff'},
-      {label:'Closed',data:[12,14,18,22,11],borderColor:'#28a745'}
-    ]
-  }
-});
+  <script>
+    const baseData = {
+      products: [
+        { name: 'PaperSave', pending: 22, highCritical: 11, acv: 6.8, old8w: 9, status: 'Customer Live', customer: 'Port Authority', severityMix: { Critical: 2, High: 9, Medium: 7, Low: 4 }, stateMix: { Active: 9, New: 5, 'In Progress': 4, Review: 2, Blocked: 2 } },
+        { name: 'PairSoft Platform', pending: 14, highCritical: 7, acv: 4.1, old8w: 4, status: 'Customer Live', customer: 'The Thacher School', severityMix: { Critical: 1, High: 6, Medium: 5, Low: 2 }, stateMix: { Active: 5, New: 3, 'In Progress': 3, Review: 2, Blocked: 1 } },
+        { name: 'Webiplex', pending: 9, highCritical: 3, acv: 2.6, old8w: 2, status: 'Project', customer: 'Cargo Carriers', severityMix: { Critical: 0, High: 3, Medium: 4, Low: 2 }, stateMix: { Active: 3, New: 2, 'In Progress': 2, Review: 1, Blocked: 1 } },
+        { name: 'PaperSave Agile', pending: 7, highCritical: 3, acv: 1.8, old8w: 2, status: 'Customer Live', customer: 'Kansas City Public', severityMix: { Critical: 0, High: 3, Medium: 2, Low: 2 }, stateMix: { Active: 3, New: 0, 'In Progress': 3, Review: 1, Blocked: 0 } }
+      ],
+      createdClosed: {
+        labels: ['Oct 25', 'Nov 25', 'Dec 25', 'Jan 26', 'Feb 26', 'Mar 26'],
+        created: [14, 17, 21, 19, 16, 13],
+        closed: [18, 15, 19, 22, 14, 10]
+      },
+      weekly: {
+        labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8'],
+        created: [5, 4, 6, 3, 5, 6, 4, 3],
+        closed: [6, 5, 4, 5, 4, 3, 3, 2]
+      },
+      developers: [
+        { name: 'Aman', closed: 16 },
+        { name: 'Pooja', closed: 13 },
+        { name: 'Rakesh', closed: 10 },
+        { name: 'Neha', closed: 8 },
+        { name: 'Vikas', closed: 7 }
+      ],
+      kpis: {
+        pendingBacklog: 52,
+        totalClosed: 98,
+        createdThisMonth: 13,
+        closedThisMonth: 10,
+        slaPercent: 65.4,
+        met: 34,
+        missed: 18,
+        acvImpact: 15.3,
+        highImpactItems: 24
+      }
+    };
 
-/* SLA Donut */
-new Chart(document.getElementById('sla'), {
-  type:'doughnut',
-  data:{
-    datasets:[{
-      data:[34,18],
-      backgroundColor:['#2e8b57','#e5e5e5'],
-      borderWidth:0
-    }]
-  },
-  options:{
-    cutout:'75%', /* thin ring */
-    plugins:{legend:{display:false}}
-  }
-});
+    const state = {
+      theme: localStorage.getItem('defect_theme') || 'warm',
+      filters: {
+        dateRange: 'Last 6 Months',
+        product: 'All Products',
+        customer: 'All Customers',
+        status: 'All Statuses',
+        severity: 'All'
+      }
+    };
 
-/* AI Toggle */
-function toggleAI(){
-  let el = document.getElementById('aiDrawer');
-  el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
-}
+    const body = document.body;
+    const themeSelect = document.getElementById('themeSelect');
+    const productFilter = document.getElementById('productFilter');
+    const customerFilter = document.getElementById('customerFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const severityFilter = document.getElementById('severityFilter');
+    const dateRange = document.getElementById('dateRange');
+    const metaRow = document.getElementById('metaRow');
+    const kpiGrid = document.getElementById('kpiGrid');
+    const productBars = document.getElementById('productBars');
+    const developerBars = document.getElementById('developerBars');
+    const attentionTable = document.getElementById('attentionTable');
 
-</script>
+    let trendChart, severityChart, stateChart, weeklyChart, slaChart;
 
+    function initFilters() {
+      const products = ['All Products', ...baseData.products.map(p => p.name)];
+      const customers = ['All Customers', ...new Set(baseData.products.map(p => p.customer))];
+      const statuses = ['All Statuses', ...new Set(baseData.products.map(p => p.status))];
+      const severities = ['All', 'Critical', 'High', 'Medium', 'Low'];
+      buildOptions(productFilter, products);
+      buildOptions(customerFilter, customers);
+      buildOptions(statusFilter, statuses);
+      buildOptions(severityFilter, severities);
+      themeSelect.value = state.theme;
+      applyTheme(state.theme);
+    }
+
+    function buildOptions(el, items) {
+      el.innerHTML = items.map(v => `<option>${v}</option>`).join('');
+    }
+
+    function applyTheme(theme) {
+      state.theme = theme;
+      body.setAttribute('data-theme', theme);
+      localStorage.setItem('defect_theme', theme);
+      refreshCharts();
+    }
+
+    function getFilteredProducts() {
+      return baseData.products.filter(p => {
+        if (state.filters.product !== 'All Products' && p.name !== state.filters.product) return false;
+        if (state.filters.customer !== 'All Customers' && p.customer !== state.filters.customer) return false;
+        if (state.filters.status !== 'All Statuses' && p.status !== state.filters.status) return false;
+        return true;
+      });
+    }
+
+    function aggregateSeverity(products) {
+      const out = { Critical: 0, High: 0, Medium: 0, Low: 0 };
+      products.forEach(p => Object.keys(out).forEach(k => out[k] += p.severityMix[k] || 0));
+      if (state.filters.severity !== 'All') {
+        return { [state.filters.severity]: out[state.filters.severity] };
+      }
+      return out;
+    }
+
+    function aggregateState(products) {
+      const out = { New: 0, Active: 0, 'In Progress': 0, Review: 0, Blocked: 0 };
+      products.forEach(p => Object.keys(out).forEach(k => out[k] += p.stateMix[k] || 0));
+      return out;
+    }
+
+    function getKpis(products) {
+      if (!products.length) {
+        return { pendingBacklog: 0, totalClosed: 0, createdThisMonth: 0, closedThisMonth: 0, slaPercent: 0, met: 0, missed: 0, acvImpact: 0, highImpactItems: 0 };
+      }
+      const ratio = products.length / baseData.products.length;
+      const pending = products.reduce((a, b) => a + b.pending, 0);
+      const highImpact = products.reduce((a, b) => a + b.highCritical, 0);
+      const acv = products.reduce((a, b) => a + b.acv, 0);
+      const met = Math.max(0, Math.round(baseData.kpis.met * ratio));
+      const missed = Math.max(0, Math.round(baseData.kpis.missed * ratio));
+      const totalForSla = met + missed || 1;
+      const slaPercent = (met / totalForSla) * 100;
+      return {
+        pendingBacklog: pending,
+        totalClosed: Math.max(0, Math.round(baseData.kpis.totalClosed * ratio)),
+        createdThisMonth: Math.max(0, Math.round(baseData.kpis.createdThisMonth * ratio)),
+        closedThisMonth: Math.max(0, Math.round(baseData.kpis.closedThisMonth * ratio)),
+        slaPercent,
+        met,
+        missed,
+        acvImpact: acv,
+        highImpactItems: highImpact
+      };
+    }
+
+    function renderMeta() {
+      const now = new Date();
+      metaRow.innerHTML = `
+        <div class="chip">Filters: ${state.filters.product} • ${state.filters.customer} • ${state.filters.dateRange}</div>
+        <div class="chip">Last refreshed: ${now.toLocaleDateString()} ${now.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit'})}</div>
+      `;
+    }
+
+    function renderKpis(kpis) {
+      const items = [
+        ['Pending Backlog', kpis.pendingBacklog, '+3 vs prev month', 'danger'],
+        ['Total Closed So Far', kpis.totalClosed, `${kpis.closedThisMonth} closed in latest month`, 'success'],
+        ['Created This Month', kpis.createdThisMonth, 'Inflow above closure', 'warning'],
+        ['Closed This Month', kpis.closedThisMonth, `${Math.round((kpis.closedThisMonth / Math.max(1, kpis.createdThisMonth)) * 100)}% of created`, 'warning'],
+        ['4-Week Target Met', `${kpis.slaPercent.toFixed(1)}%`, `${kpis.met} met / ${kpis.missed} missed`, 'warning'],
+        ['Pending ACV Impact', `₹${kpis.acvImpact.toFixed(1)}L`, `${kpis.highImpactItems} high-impact items`, 'danger']
+      ];
+      kpiGrid.innerHTML = items.map(([label, value, foot, cls]) => `
+        <div class="card kpi-card">
+          <div class="kpi-label">${label}</div>
+          <div class="kpi-value">${value}</div>
+          <div class="kpi-foot ${cls}">${foot}</div>
+        </div>
+      `).join('');
+    }
+
+    function getCss(name) {
+      return getComputedStyle(document.body).getPropertyValue(name).trim();
+    }
+
+    function commonChartOptions() {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: getCss('--muted'), boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } },
+          tooltip: { enabled: true }
+        },
+        scales: {
+          x: { ticks: { color: getCss('--muted') }, grid: { color: 'transparent' } },
+          y: { ticks: { color: getCss('--muted') }, grid: { color: getCss('--line') } }
+        }
+      };
+    }
+
+    function renderProductBars(products) {
+      const max = Math.max(...products.map(p => p.pending), 1);
+      productBars.innerHTML = products.map((p, i) => {
+        const colors = [getCss('--accent'), getCss('--accent-2'), '#ce8f0c', getCss('--success')];
+        return `
+          <div class="bar-row">
+            <div class="bar-label">${p.name}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${(p.pending / max) * 100}%; background:${colors[i % colors.length]};"></div></div>
+            <div class="bar-value">${p.pending}</div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('productFoot').textContent = products.length ? `Highest backlog: ${products.slice().sort((a,b)=>b.pending-a.pending)[0].name}` : 'No matching products';
+    }
+
+    function renderDeveloperBars(products) {
+      const ratio = products.length / baseData.products.length || 0;
+      const devs = baseData.developers.map(d => ({ ...d, closed: Math.max(0, Math.round(d.closed * ratio || d.closed * 0)) })).filter(d => d.closed > 0);
+      const max = Math.max(...(devs.map(d => d.closed)), 1);
+      developerBars.innerHTML = devs.map(d => `
+        <div class="bar-row">
+          <div class="bar-label">${d.name}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(d.closed / max) * 100}%; background:${getCss('--success')};"></div></div>
+          <div class="bar-value">${d.closed}</div>
+        </div>
+      `).join('');
+      document.getElementById('devFoot').textContent = devs.length ? `Top closer: ${devs.slice().sort((a,b)=>b.closed-a.closed)[0].name}` : 'No developer data';
+    }
+
+    function renderAttention(products) {
+      attentionTable.innerHTML = products.map(p => `
+        <tr>
+          <td>${p.name}</td>
+          <td>${p.pending}</td>
+          <td>${p.highCritical}</td>
+          <td>₹${p.acv.toFixed(1)}L</td>
+          <td>${p.old8w}</td>
+        </tr>
+      `).join('');
+    }
+
+    function buildAiText(products, kpis, severity, states) {
+      const topProduct = products.slice().sort((a,b)=>b.pending-a.pending)[0];
+      const sevTop = Object.entries(severity).sort((a,b)=>b[1]-a[1])[0] || ['None',0];
+      const stateTop = Object.entries(states).sort((a,b)=>b[1]-a[1])[0] || ['None',0];
+      document.getElementById('summaryText').textContent = `Current backlog stands at ${kpis.pendingBacklog} items across ${products.length} product area(s). The highest concentration is in ${topProduct ? topProduct.name : 'no product'}, while the backlog mix is led by ${sevTop[0]} severity items. Closure volume is ${kpis.closedThisMonth} for the latest month against ${kpis.createdThisMonth} newly created tickets.`;
+      document.getElementById('riskText').textContent = `${kpis.highImpactItems} open items are High or Critical, and ${topProduct ? topProduct.old8w : 0} older tickets above 8 weeks sit in the most impacted product. Operationally, the largest open state is ${stateTop[0]} (${stateTop[1]} items), which may indicate work waiting in the same step for too long.`;
+      document.getElementById('actionText').textContent = `Prioritize ${topProduct ? topProduct.name : 'the top product'} first, review ${sevTop[0]} backlog older than 8 weeks, and push the current-month closure rate above inflow. A practical management action is to review blocked/review items daily and rebalance developer effort toward the highest ACV backlog.`;
+    }
+
+    function renderAll() {
+      renderMeta();
+      const products = getFilteredProducts();
+      const severity = aggregateSeverity(products);
+      const states = aggregateState(products);
+      const kpis = getKpis(products);
+      renderKpis(kpis);
+      renderProductBars(products);
+      renderDeveloperBars(products);
+      renderAttention(products);
+      buildAiText(products, kpis, severity, states);
+
+      document.getElementById('trendFoot').textContent = `Pending latest month: ${kpis.pendingBacklog}`;
+      document.getElementById('severityFoot').textContent = `${kpis.pendingBacklog} open items`;
+      const topState = Object.entries(states).sort((a,b)=>b[1]-a[1])[0];
+      document.getElementById('stateFoot').textContent = topState ? `Top state: ${topState[0]}` : 'No state data';
+      document.getElementById('weeklyFoot').textContent = `8-week closure total: ${baseData.weekly.closed.reduce((a,b)=>a+b,0)}`;
+      document.getElementById('metLabel').textContent = `Met: ${kpis.met}`;
+      document.getElementById('missedLabel').textContent = `Missed: ${kpis.missed}`;
+      document.getElementById('slaCenter').textContent = `${kpis.slaPercent.toFixed(0)}%`;
+      document.getElementById('slaFoot').textContent = `${kpis.slaPercent.toFixed(1)}% met within 4 weeks`;
+
+      refreshCharts(products, severity, states, kpis);
+    }
+
+    function destroyChart(chart) { if (chart) chart.destroy(); }
+
+    function refreshCharts(products = getFilteredProducts(), severity = aggregateSeverity(products), states = aggregateState(products), kpis = getKpis(products)) {
+      const trendOpt = commonChartOptions();
+      destroyChart(trendChart);
+      trendChart = new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+          labels: baseData.createdClosed.labels,
+          datasets: [
+            { label: 'Created', data: baseData.createdClosed.created, borderColor: getCss('--accent'), backgroundColor: getCss('--accent'), tension: .35, pointRadius: 3, pointHoverRadius: 4 },
+            { label: 'Closed', data: baseData.createdClosed.closed, borderColor: getCss('--success'), backgroundColor: getCss('--success'), tension: .35, pointRadius: 3, pointHoverRadius: 4 }
+          ]
+        },
+        options: trendOpt
+      });
+
+      destroyChart(severityChart);
+      severityChart = new Chart(document.getElementById('severityChart'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(severity),
+          datasets: [{ data: Object.values(severity), backgroundColor: [getCss('--danger'), getCss('--warning'), getCss('--accent'), getCss('--success')] }]
+        },
+        options: {
+          ...commonChartOptions(),
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      destroyChart(stateChart);
+      stateChart = new Chart(document.getElementById('stateChart'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(states),
+          datasets: [{ data: Object.values(states), backgroundColor: [getCss('--accent-2'), getCss('--success'), getCss('--accent'), '#8b9bb6', getCss('--danger')] }]
+        },
+        options: {
+          ...commonChartOptions(),
+          indexAxis: 'y',
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      destroyChart(weeklyChart);
+      weeklyChart = new Chart(document.getElementById('weeklyChart'), {
+        type: 'bar',
+        data: {
+          labels: baseData.weekly.labels,
+          datasets: [
+            { label: 'Created', data: baseData.weekly.created, backgroundColor: getCss('--accent'), borderRadius: 999, barThickness: 14 },
+            { label: 'Closed', data: baseData.weekly.closed, backgroundColor: getCss('--success'), borderRadius: 999, barThickness: 14 }
+          ]
+        },
+        options: {
+          ...commonChartOptions(),
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+
+      destroyChart(slaChart);
+      slaChart = new Chart(document.getElementById('slaChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Met', 'Missed'],
+          datasets: [{
+            data: [kpis.met, kpis.missed],
+            backgroundColor: [getCss('--success'), colorForMissed()],
+            borderWidth: 0,
+            hoverOffset: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '78%',
+          plugins: { legend: { display: false }, tooltip: { enabled: true } }
+        }
+      });
+    }
+
+    function colorForMissed() {
+      const theme = state.theme;
+      return theme === 'dark' ? '#2d3b54' : '#e7e1d8';
+    }
+
+    function openDrawer() {
+      document.getElementById('aiDrawer').classList.add('open');
+      document.getElementById('drawerOverlay').classList.add('show');
+    }
+
+    function closeDrawer() {
+      document.getElementById('aiDrawer').classList.remove('open');
+      document.getElementById('drawerOverlay').classList.remove('show');
+    }
+
+    function setupEvents() {
+      themeSelect.addEventListener('change', e => applyTheme(e.target.value));
+      document.getElementById('applyBtn').addEventListener('click', () => {
+        state.filters = {
+          dateRange: dateRange.value,
+          product: productFilter.value,
+          customer: customerFilter.value,
+          status: statusFilter.value,
+          severity: severityFilter.value
+        };
+        renderAll();
+      });
+
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        dateRange.value = 'Last 6 Months';
+        productFilter.value = 'All Products';
+        customerFilter.value = 'All Customers';
+        statusFilter.value = 'All Statuses';
+        severityFilter.value = 'All';
+        state.filters = {
+          dateRange: 'Last 6 Months',
+          product: 'All Products',
+          customer: 'All Customers',
+          status: 'All Statuses',
+          severity: 'All'
+        };
+        renderAll();
+      });
+
+      ['openAiBtn', 'fabBtn'].forEach(id => document.getElementById(id).addEventListener('click', openDrawer));
+      document.getElementById('closeDrawerBtn').addEventListener('click', closeDrawer);
+      document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
+      document.querySelectorAll('.prompt-chip').forEach(btn => btn.addEventListener('click', () => {
+        document.getElementById('aiPrompt').value = btn.textContent;
+      }));
+
+      document.getElementById('generateBtn').addEventListener('click', () => {
+        const prompt = document.getElementById('aiPrompt').value.trim();
+        if (prompt) {
+          document.getElementById('summaryText').textContent = `Prompt received: "${prompt}". In live mode, this question would be sent with the current dashboard context. For now, the dashboard shows the most important points directly from the active filter view.`;
+        }
+      });
+
+      document.getElementById('readBtn').addEventListener('click', () => {
+        const text = document.getElementById('summaryText').textContent;
+        if ('speechSynthesis' in window && text) {
+          const u = new SpeechSynthesisUtterance(text);
+          speechSynthesis.cancel();
+          speechSynthesis.speak(u);
+        }
+      });
+    }
+
+    initFilters();
+    setupEvents();
+    renderAll();
+  </script>
 </body>
 </html>
