@@ -7,79 +7,103 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --bg: #f3efe7;
-      --surface: #fbf8f2;
-      --surface-2: #f7f2e8;
+      --bg: #eef3f9;
+      --surface: #f7fbff;
+      --surface-2: #eef5fc;
+      --card: #fbfdff;
+      --card-2: #f4f8fd;
+      --text: #1f3d63;
+      --muted: #6781a4;
+      --line: #d7e3f0;
+      --shadow: 0 10px 28px rgba(33, 65, 110, 0.08);
+      --accent: #3b82f6;
+      --accent-2: #70a8ff;
+      --success: #22a06b;
+      --danger: #e25d5d;
+      --warning: #d59a23;
+      --pill: #edf4fb;
+      --overlay: rgba(28, 52, 91, 0.18);
+      --missed-ring: #e6e0d8;
+    }
+
+    [data-theme="warm"] {
+      --bg: #f4efe7;
+      --surface: #fbf7f0;
+      --surface-2: #f6efe4;
       --card: #fffaf2;
-      --card-2: #f5efe3;
-      --text: #433225;
-      --muted: #8a735b;
-      --line: #e4d8c7;
-      --shadow: 0 10px 30px rgba(90, 68, 36, 0.08);
-      --accent: #c69624;
-      --accent-2: #7d84f3;
-      --success: #2f9662;
-      --danger: #d45a52;
-      --warning: #d88c00;
+      --card-2: #f8f1e5;
+      --text: #443225;
+      --muted: #8c745c;
+      --line: #e4d8c8;
+      --shadow: 0 10px 28px rgba(90, 67, 37, 0.08);
+      --accent: #c69424;
+      --accent-2: #8890f2;
+      --success: #23a868;
+      --danger: #db5a55;
+      --warning: #d38c00;
       --pill: #efe3cc;
-      --overlay: rgba(40, 27, 8, 0.18);
+      --overlay: rgba(43, 28, 9, 0.2);
+      --missed-ring: #e6ddd3;
     }
 
     [data-theme="dark"] {
-      --bg: #101722;
-      --surface: #141d2a;
-      --surface-2: #182334;
-      --card: #192434;
-      --card-2: #172131;
-      --text: #ecf2ff;
-      --muted: #97aac8;
-      --line: #26354d;
-      --shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
-      --accent: #f2b84b;
-      --accent-2: #7ba7ff;
-      --success: #38b980;
-      --danger: #ff7b72;
-      --warning: #ffbf4d;
+      --bg: #0e1723;
+      --surface: #121d2b;
+      --surface-2: #162233;
+      --card: #172333;
+      --card-2: #15202f;
+      --text: #ebf3ff;
+      --muted: #96aac8;
+      --line: #27374f;
+      --shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+      --accent: #f3b74c;
+      --accent-2: #7ea8ff;
+      --success: #35b97b;
+      --danger: #ff7d74;
+      --warning: #ffc14f;
       --pill: #223149;
-      --overlay: rgba(0, 0, 0, 0.45);
+      --overlay: rgba(0, 0, 0, 0.48);
+      --missed-ring: #2a384e;
     }
 
     [data-theme="light"] {
-      --bg: #eef3f8;
-      --surface: #f8fbff;
-      --surface-2: #eef5fb;
-      --card: #ffffff;
-      --card-2: #f5f9fd;
-      --text: #1e3350;
-      --muted: #5f7795;
-      --line: #d6e3f0;
-      --shadow: 0 10px 30px rgba(35, 70, 110, 0.08);
-      --accent: #2f83f1;
-      --accent-2: #6ea8ff;
-      --success: #20a36a;
-      --danger: #e05d5d;
-      --warning: #d69623;
-      --pill: #e9f1fb;
-      --overlay: rgba(40, 70, 120, 0.15);
+      --bg: #eef3f9;
+      --surface: #f7fbff;
+      --surface-2: #eef5fc;
+      --card: #fbfdff;
+      --card-2: #f4f8fd;
+      --text: #1f3d63;
+      --muted: #6781a4;
+      --line: #d7e3f0;
+      --shadow: 0 10px 28px rgba(33, 65, 110, 0.08);
+      --accent: #3b82f6;
+      --accent-2: #70a8ff;
+      --success: #22a06b;
+      --danger: #e25d5d;
+      --warning: #d59a23;
+      --pill: #edf4fb;
+      --overlay: rgba(28, 52, 91, 0.18);
+      --missed-ring: #e7edf5;
     }
 
     [data-theme="blue"] {
-      --bg: #e9eff8;
-      --surface: #f5f8fe;
-      --surface-2: #edf3fd;
-      --card: #fbfdff;
-      --card-2: #f2f7ff;
-      --text: #233b66;
-      --muted: #627da6;
-      --line: #d8e1ef;
-      --shadow: 0 12px 28px rgba(38, 70, 130, 0.08);
-      --accent: #4d7cff;
-      --accent-2: #7ca9ff;
-      --success: #2f9c78;
-      --danger: #dc6666;
-      --warning: #d9a227;
-      --pill: #e7eefc;
-      --overlay: rgba(30, 60, 120, 0.18);
+      --bg: #e9f0fb;
+      --surface: #f5f9ff;
+      --surface-2: #edf4ff;
+      --card: #fcfdff;
+      --card-2: #f4f8ff;
+      --text: #243f6d;
+      --muted: #6a83ad;
+      --line: #d6e2f3;
+      --shadow: 0 12px 28px rgba(41, 70, 125, 0.09);
+      --accent: #4c7dff;
+      --accent-2: #7ea8ff;
+      --success: #279c76;
+      --danger: #df6464;
+      --warning: #d9a128;
+      --pill: #e8effc;
+      --overlay: rgba(29, 54, 111, 0.18);
+      --missed-ring: #dfe7f3;
     }
 
     * { box-sizing: border-box; }
@@ -91,29 +115,20 @@
       color: var(--text);
       font-family: Segoe UI, Inter, Arial, sans-serif;
       min-height: 100%;
-      overflow-x: hidden;
+      overflow-x: auto;
+      overflow-y: auto;
     }
 
     body {
-      padding-top: 14px;
+      padding-top: 10px;
     }
 
     .page {
       width: 100%;
-      max-width: 1240px;
+      min-width: 1120px;
+      max-width: 1120px;
       margin: 0 auto;
-      padding: 8px 14px 80px;
-    }
-
-    .top-gap {
-      height: 8px;
-    }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 14px;
-      align-items: stretch;
+      padding: 10px 12px 96px;
     }
 
     .panel,
@@ -125,8 +140,16 @@
       min-width: 0;
     }
 
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: stretch;
+    }
+
     .panel {
-      padding: 18px 18px 16px;
+      padding: 16px;
     }
 
     .title-badge {
@@ -137,7 +160,7 @@
       border-radius: 999px;
       background: var(--pill);
       color: var(--accent);
-      font-weight: 700;
+      font-weight: 800;
       font-size: 12px;
       letter-spacing: .04em;
       text-transform: uppercase;
@@ -171,7 +194,8 @@
       border-radius: 999px;
       font-size: 12px;
       color: var(--muted);
-      background: color-mix(in srgb, var(--card) 60%, transparent);
+      background: color-mix(in srgb, var(--card) 80%, transparent);
+      white-space: nowrap;
     }
 
     .filters {
@@ -190,7 +214,7 @@
     .field label {
       font-size: 12px;
       color: var(--muted);
-      font-weight: 600;
+      font-weight: 700;
     }
 
     select, .btn, textarea {
@@ -205,6 +229,7 @@
       padding: 12px 14px;
       min-height: 46px;
       outline: none;
+      width: 100%;
     }
 
     .actions {
@@ -219,12 +244,14 @@
     .btn {
       padding: 12px 16px;
       cursor: pointer;
-      font-weight: 700;
-      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+      font-weight: 800;
+      transition: transform .15s ease, opacity .15s ease;
       box-shadow: none;
+      white-space: nowrap;
     }
 
     .btn:hover { transform: translateY(-1px); }
+
     .btn.primary {
       background: linear-gradient(90deg, var(--accent), var(--accent-2));
       color: white;
@@ -244,33 +271,33 @@
     }
 
     .kpi-grid {
-      margin-top: 12px;
       display: grid;
       grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: 12px;
+      margin-bottom: 12px;
     }
 
     .kpi-card {
-      padding: 14px 14px 12px;
+      padding: 14px;
       min-height: 110px;
     }
 
     .kpi-label {
       font-size: 12px;
       color: var(--muted);
-      font-weight: 700;
+      font-weight: 800;
       margin-bottom: 10px;
     }
 
     .kpi-value {
-      font-size: 24px;
-      font-weight: 800;
+      font-size: 22px;
+      font-weight: 900;
       margin-bottom: 8px;
     }
 
     .kpi-foot {
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .danger { color: var(--danger); }
@@ -278,7 +305,6 @@
     .warning { color: var(--warning); }
 
     .main-grid {
-      margin-top: 14px;
       display: grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
       gap: 12px;
@@ -291,21 +317,21 @@
 
     .card {
       padding: 16px;
-      overflow: hidden;
+      overflow: visible;
     }
 
     .card-header {
       display: flex;
       justify-content: space-between;
-      gap: 12px;
       align-items: flex-start;
+      gap: 12px;
       margin-bottom: 10px;
     }
 
     .card-title {
       margin: 0;
       font-size: 16px;
-      font-weight: 800;
+      font-weight: 900;
     }
 
     .card-sub {
@@ -324,19 +350,21 @@
       padding: 9px 12px;
       border-radius: 999px;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 800;
       color: var(--text);
       background: var(--pill);
       border: 1px solid var(--line);
+      white-space: nowrap;
     }
 
     .chart-shell {
       border: 1px solid var(--line);
       border-radius: 22px;
-      background: color-mix(in srgb, var(--surface) 80%, transparent);
+      background: color-mix(in srgb, var(--surface) 82%, transparent);
       padding: 12px;
-      min-height: 290px;
+      min-height: 285px;
       position: relative;
+      overflow: hidden;
     }
 
     .compact-shell {
@@ -351,6 +379,7 @@
       margin-top: 12px;
       color: var(--muted);
       font-size: 12px;
+      min-width: 0;
     }
 
     .footer-line .pill {
@@ -359,17 +388,18 @@
       border-radius: 999px;
       border: 1px solid var(--line);
       white-space: nowrap;
+      flex: 0 0 auto;
     }
 
     .bar-list {
       display: grid;
       gap: 14px;
-      padding: 10px 6px 6px;
+      padding: 8px 4px 4px;
     }
 
     .bar-row {
       display: grid;
-      grid-template-columns: 96px 1fr 36px;
+      grid-template-columns: 92px 1fr 36px;
       gap: 10px;
       align-items: center;
       min-width: 0;
@@ -378,13 +408,13 @@
     .bar-label {
       color: var(--muted);
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 800;
       text-align: right;
     }
 
     .bar-track {
       position: relative;
-      height: 22px;
+      height: 20px;
       border-radius: 999px;
       background: color-mix(in srgb, var(--line) 60%, transparent);
       overflow: hidden;
@@ -392,23 +422,21 @@
 
     .bar-fill {
       position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
+      inset: 0 auto 0 0;
       border-radius: 999px;
+      width: 0;
     }
 
     .bar-value {
       font-size: 12px;
-      font-weight: 800;
-      color: var(--text);
+      font-weight: 900;
     }
 
     .table-wrap {
       overflow: hidden;
       border: 1px solid var(--line);
       border-radius: 20px;
-      background: color-mix(in srgb, var(--surface) 82%, transparent);
+      background: color-mix(in srgb, var(--surface) 86%, transparent);
     }
 
     table {
@@ -426,9 +454,7 @@
     th {
       color: var(--muted);
       font-size: 11px;
-      letter-spacing: .02em;
-      text-transform: none;
-      font-weight: 800;
+      font-weight: 900;
     }
 
     tr:last-child td { border-bottom: none; }
@@ -439,24 +465,25 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding-top: 18px;
+      padding-top: 8px;
     }
 
     .sla-summary {
       position: absolute;
-      top: 12px;
-      right: 12px;
+      top: 8px;
+      right: 14px;
       text-align: right;
       font-size: 12px;
-      line-height: 1.5;
-      font-weight: 800;
+      line-height: 1.55;
+      font-weight: 900;
+      z-index: 2;
     }
 
     .donut-wrap {
       position: relative;
       width: 210px;
       height: 210px;
-      margin-top: 8px;
+      margin-top: 6px;
     }
 
     .donut-center {
@@ -489,37 +516,40 @@
       position: fixed;
       top: 0;
       right: 0;
-      width: 340px;
-      max-width: 92vw;
+      width: 286px;
+      max-width: 286px;
       height: 100vh;
       background: linear-gradient(180deg, var(--card), var(--card-2));
       border-left: 1px solid var(--line);
-      box-shadow: -12px 0 28px rgba(0,0,0,0.12);
+      box-shadow: -12px 0 28px rgba(0,0,0,0.14);
       transform: translateX(100%);
       transition: transform .22s ease;
       z-index: 999;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
     .ai-drawer.open { transform: translateX(0); }
 
     .drawer-head {
-      padding: 16px 16px 12px;
+      padding: 14px 14px 10px;
       border-bottom: 1px solid var(--line);
+      flex: 0 0 auto;
     }
 
     .drawer-title {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       margin-bottom: 8px;
     }
 
     .drawer-title h3 {
       margin: 0;
-      font-size: 18px;
+      font-size: 17px;
+      line-height: 1.2;
     }
 
     .icon-btn {
@@ -527,32 +557,35 @@
       background: var(--surface);
       color: var(--text);
       border-radius: 12px;
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
       cursor: pointer;
       font-size: 16px;
+      flex: 0 0 auto;
     }
 
     .drawer-body {
-      padding: 14px 16px 12px;
+      padding: 12px 14px 10px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       min-height: 0;
-      flex: 1;
+      flex: 1 1 auto;
       overflow-y: auto;
+      overflow-x: hidden;
     }
 
     .insight-box {
       border: 1px solid var(--line);
       border-radius: 18px;
-      background: color-mix(in srgb, var(--surface) 86%, transparent);
-      padding: 12px 13px;
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+      padding: 11px 12px;
+      overflow: hidden;
     }
 
     .insight-head {
-      font-size: 12px;
-      font-weight: 800;
+      font-size: 11px;
+      font-weight: 900;
       color: var(--muted);
       margin-bottom: 8px;
       text-transform: uppercase;
@@ -560,9 +593,10 @@
     }
 
     .insight-text {
-      font-size: 13px;
-      line-height: 1.55;
+      font-size: 12px;
+      line-height: 1.5;
       color: var(--text);
+      word-break: break-word;
     }
 
     .prompt-grid {
@@ -575,33 +609,35 @@
       background: var(--surface);
       color: var(--text);
       border-radius: 999px;
-      padding: 10px 12px;
+      padding: 9px 11px;
       text-align: left;
       cursor: pointer;
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 11px;
+      font-weight: 800;
+      width: 100%;
     }
 
     .drawer-foot {
-      padding: 12px 16px 16px;
+      padding: 12px 14px 14px;
       border-top: 1px solid var(--line);
-      background: color-mix(in srgb, var(--card) 85%, transparent);
-      position: sticky;
-      bottom: 0;
+      background: color-mix(in srgb, var(--card) 90%, transparent);
+      flex: 0 0 auto;
+      overflow: hidden;
     }
 
     textarea {
       width: 100%;
-      min-height: 90px;
-      max-height: 90px;
-      padding: 12px 13px;
+      min-height: 78px;
+      max-height: 78px;
+      padding: 11px 12px;
       resize: none;
       outline: none;
+      overflow: auto;
     }
 
     .drawer-actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       margin-top: 10px;
       flex-wrap: wrap;
     }
@@ -623,38 +659,21 @@
       border-radius: 18px;
       background: linear-gradient(90deg, var(--accent), var(--accent-2));
       color: white;
-      font-weight: 800;
+      font-weight: 900;
       box-shadow: 0 12px 26px rgba(0,0,0,0.15);
       cursor: pointer;
-    }
-
-    @media (max-width: 1120px) {
-      .page { max-width: 1080px; }
-      .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .hero-grid { grid-template-columns: 1fr; }
-      .span-8, .span-6, .span-4 { grid-column: span 12; }
-    }
-
-    @media (max-width: 760px) {
-      .page { padding-inline: 10px; }
-      .filters { grid-template-columns: 1fr; }
-      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .bar-row { grid-template-columns: 82px 1fr 30px; }
-      .donut-wrap { width: 180px; height: 180px; }
-      .fab { right: 12px; bottom: 12px; }
+      white-space: nowrap;
     }
   </style>
 </head>
-<body data-theme="warm">
+<body data-theme="light">
   <div class="page">
-    <div class="top-gap"></div>
-
     <section class="hero-grid">
       <div class="panel">
         <div class="title-badge">Demo Mode • Frontend Prototype</div>
         <h1>Defect Operations Dashboard</h1>
         <div class="subtext">
-          Compact single-file dashboard designed for Azure DevOps web widgets. Demo mode is built in, theme switching is live, and the layout is tightened to avoid horizontal scrolling inside 7–8 tile widgets.
+          Compact single-file dashboard designed for Azure DevOps web widgets. Demo mode is built in, theme switching is live, and the layout is intentionally width-controlled so 7–8 tile widgets can still use horizontal scrolling when needed.
         </div>
         <div class="meta-row" id="metaRow"></div>
         <div class="chip-row" style="margin-top:10px;">
@@ -677,9 +696,9 @@
           <div class="field">
             <label>Theme</label>
             <select id="themeSelect">
+              <option value="light">Light Professional</option>
               <option value="warm">Warm BI</option>
               <option value="dark">Dark Classic</option>
-              <option value="light">Light Professional</option>
               <option value="blue">Blue Executive</option>
             </select>
           </div>
@@ -704,7 +723,7 @@
             <button class="btn ghost" id="resetBtn">Reset</button>
             <button class="btn ghost" id="openAiBtn">Open AI Insights</button>
           </div>
-          <div class="helper">Tip: the current prototype updates all widgets locally without any backend.</div>
+          <div class="helper">Tip: this prototype updates all widgets locally without any backend.</div>
         </div>
       </div>
     </section>
@@ -783,7 +802,10 @@
           <div class="tag">SLA</div>
         </div>
         <div class="chart-shell compact-shell sla-shell">
-          <div class="sla-summary"><div class="success" id="metLabel"></div><div class="danger" id="missedLabel"></div></div>
+          <div class="sla-summary">
+            <div class="success" id="metLabel"></div>
+            <div class="danger" id="missedLabel"></div>
+          </div>
           <div class="donut-wrap">
             <canvas id="slaChart"></canvas>
             <div class="donut-center" id="slaCenter"></div>
@@ -918,7 +940,7 @@
     };
 
     const state = {
-      theme: localStorage.getItem('defect_theme') || 'warm',
+      theme: localStorage.getItem('defect_theme') || 'light',
       filters: {
         dateRange: 'Last 6 Months',
         product: 'All Products',
@@ -943,21 +965,17 @@
 
     let trendChart, severityChart, stateChart, weeklyChart, slaChart;
 
-    function initFilters() {
-      const products = ['All Products', ...baseData.products.map(p => p.name)];
-      const customers = ['All Customers', ...new Set(baseData.products.map(p => p.customer))];
-      const statuses = ['All Statuses', ...new Set(baseData.products.map(p => p.status))];
-      const severities = ['All', 'Critical', 'High', 'Medium', 'Low'];
-      buildOptions(productFilter, products);
-      buildOptions(customerFilter, customers);
-      buildOptions(statusFilter, statuses);
-      buildOptions(severityFilter, severities);
-      themeSelect.value = state.theme;
-      applyTheme(state.theme);
-    }
-
     function buildOptions(el, items) {
       el.innerHTML = items.map(v => `<option>${v}</option>`).join('');
+    }
+
+    function initFilters() {
+      buildOptions(productFilter, ['All Products', ...baseData.products.map(p => p.name)]);
+      buildOptions(customerFilter, ['All Customers', ...new Set(baseData.products.map(p => p.customer))]);
+      buildOptions(statusFilter, ['All Statuses', ...new Set(baseData.products.map(p => p.status))]);
+      buildOptions(severityFilter, ['All', 'Critical', 'High', 'Medium', 'Low']);
+      themeSelect.value = state.theme;
+      applyTheme(state.theme);
     }
 
     function applyTheme(theme) {
@@ -965,6 +983,10 @@
       body.setAttribute('data-theme', theme);
       localStorage.setItem('defect_theme', theme);
       refreshCharts();
+    }
+
+    function css(name) {
+      return getComputedStyle(document.body).getPropertyValue(name).trim();
     }
 
     function getFilteredProducts() {
@@ -1001,14 +1023,13 @@
       const acv = products.reduce((a, b) => a + b.acv, 0);
       const met = Math.max(0, Math.round(baseData.kpis.met * ratio));
       const missed = Math.max(0, Math.round(baseData.kpis.missed * ratio));
-      const totalForSla = met + missed || 1;
-      const slaPercent = (met / totalForSla) * 100;
+      const total = Math.max(1, met + missed);
       return {
         pendingBacklog: pending,
         totalClosed: Math.max(0, Math.round(baseData.kpis.totalClosed * ratio)),
         createdThisMonth: Math.max(0, Math.round(baseData.kpis.createdThisMonth * ratio)),
         closedThisMonth: Math.max(0, Math.round(baseData.kpis.closedThisMonth * ratio)),
-        slaPercent,
+        slaPercent: (met / total) * 100,
         met,
         missed,
         acvImpact: acv,
@@ -1042,48 +1063,27 @@
       `).join('');
     }
 
-    function getCss(name) {
-      return getComputedStyle(document.body).getPropertyValue(name).trim();
-    }
-
-    function commonChartOptions() {
-      return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { labels: { color: getCss('--muted'), boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } },
-          tooltip: { enabled: true }
-        },
-        scales: {
-          x: { ticks: { color: getCss('--muted') }, grid: { color: 'transparent' } },
-          y: { ticks: { color: getCss('--muted') }, grid: { color: getCss('--line') } }
-        }
-      };
-    }
-
     function renderProductBars(products) {
       const max = Math.max(...products.map(p => p.pending), 1);
-      productBars.innerHTML = products.map((p, i) => {
-        const colors = [getCss('--accent'), getCss('--accent-2'), '#ce8f0c', getCss('--success')];
-        return `
-          <div class="bar-row">
-            <div class="bar-label">${p.name}</div>
-            <div class="bar-track"><div class="bar-fill" style="width:${(p.pending / max) * 100}%; background:${colors[i % colors.length]};"></div></div>
-            <div class="bar-value">${p.pending}</div>
-          </div>
-        `;
-      }).join('');
+      const colors = [css('--accent'), css('--accent-2'), '#cf900d', css('--success')];
+      productBars.innerHTML = products.map((p, i) => `
+        <div class="bar-row">
+          <div class="bar-label">${p.name}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(p.pending / max) * 100}%; background:${colors[i % colors.length]};"></div></div>
+          <div class="bar-value">${p.pending}</div>
+        </div>
+      `).join('');
       document.getElementById('productFoot').textContent = products.length ? `Highest backlog: ${products.slice().sort((a,b)=>b.pending-a.pending)[0].name}` : 'No matching products';
     }
 
     function renderDeveloperBars(products) {
       const ratio = products.length / baseData.products.length || 0;
-      const devs = baseData.developers.map(d => ({ ...d, closed: Math.max(0, Math.round(d.closed * ratio || d.closed * 0)) })).filter(d => d.closed > 0);
+      const devs = baseData.developers.map(d => ({...d, closed: Math.max(0, Math.round(d.closed * ratio))})).filter(d => d.closed > 0);
       const max = Math.max(...(devs.map(d => d.closed)), 1);
       developerBars.innerHTML = devs.map(d => `
         <div class="bar-row">
           <div class="bar-label">${d.name}</div>
-          <div class="bar-track"><div class="bar-fill" style="width:${(d.closed / max) * 100}%; background:${getCss('--success')};"></div></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(d.closed / max) * 100}%; background:${css('--success')};"></div></div>
           <div class="bar-value">${d.closed}</div>
         </div>
       `).join('');
@@ -1104,11 +1104,11 @@
 
     function buildAiText(products, kpis, severity, states) {
       const topProduct = products.slice().sort((a,b)=>b.pending-a.pending)[0];
-      const sevTop = Object.entries(severity).sort((a,b)=>b[1]-a[1])[0] || ['None',0];
-      const stateTop = Object.entries(states).sort((a,b)=>b[1]-a[1])[0] || ['None',0];
+      const sevTop = Object.entries(severity).sort((a,b)=>b[1]-a[1])[0] || ['None', 0];
+      const stateTop = Object.entries(states).sort((a,b)=>b[1]-a[1])[0] || ['None', 0];
       document.getElementById('summaryText').textContent = `Current backlog stands at ${kpis.pendingBacklog} items across ${products.length} product area(s). The highest concentration is in ${topProduct ? topProduct.name : 'no product'}, while the backlog mix is led by ${sevTop[0]} severity items. Closure volume is ${kpis.closedThisMonth} for the latest month against ${kpis.createdThisMonth} newly created tickets.`;
       document.getElementById('riskText').textContent = `${kpis.highImpactItems} open items are High or Critical, and ${topProduct ? topProduct.old8w : 0} older tickets above 8 weeks sit in the most impacted product. Operationally, the largest open state is ${stateTop[0]} (${stateTop[1]} items), which may indicate work waiting in the same step for too long.`;
-      document.getElementById('actionText').textContent = `Prioritize ${topProduct ? topProduct.name : 'the top product'} first, review ${sevTop[0]} backlog older than 8 weeks, and push the current-month closure rate above inflow. A practical management action is to review blocked/review items daily and rebalance developer effort toward the highest ACV backlog.`;
+      document.getElementById('actionText').textContent = `Prioritize ${topProduct ? topProduct.name : 'the top product'} first, review ${sevTop[0]} backlog older than 8 weeks, and push the current-month closure rate above inflow. A practical management action is to review blocked and review items daily and rebalance developer effort toward the highest ACV backlog.`;
     }
 
     function renderAll() {
@@ -1132,25 +1132,46 @@
       document.getElementById('missedLabel').textContent = `Missed: ${kpis.missed}`;
       document.getElementById('slaCenter').textContent = `${kpis.slaPercent.toFixed(0)}%`;
       document.getElementById('slaFoot').textContent = `${kpis.slaPercent.toFixed(1)}% met within 4 weeks`;
-
       refreshCharts(products, severity, states, kpis);
     }
 
-    function destroyChart(chart) { if (chart) chart.destroy(); }
+    function chartBase() {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              color: css('--muted'),
+              boxWidth: 10,
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: css('--muted') }, grid: { color: 'transparent' } },
+          y: { ticks: { color: css('--muted') }, grid: { color: css('--line') } }
+        }
+      };
+    }
+
+    function destroyChart(chart) {
+      if (chart) chart.destroy();
+    }
 
     function refreshCharts(products = getFilteredProducts(), severity = aggregateSeverity(products), states = aggregateState(products), kpis = getKpis(products)) {
-      const trendOpt = commonChartOptions();
       destroyChart(trendChart);
       trendChart = new Chart(document.getElementById('trendChart'), {
         type: 'line',
         data: {
           labels: baseData.createdClosed.labels,
           datasets: [
-            { label: 'Created', data: baseData.createdClosed.created, borderColor: getCss('--accent'), backgroundColor: getCss('--accent'), tension: .35, pointRadius: 3, pointHoverRadius: 4 },
-            { label: 'Closed', data: baseData.createdClosed.closed, borderColor: getCss('--success'), backgroundColor: getCss('--success'), tension: .35, pointRadius: 3, pointHoverRadius: 4 }
+            { label: 'Created', data: baseData.createdClosed.created, borderColor: css('--accent'), backgroundColor: css('--accent'), tension: .35, pointRadius: 3 },
+            { label: 'Closed', data: baseData.createdClosed.closed, borderColor: css('--success'), backgroundColor: css('--success'), tension: .35, pointRadius: 3 }
           ]
         },
-        options: trendOpt
+        options: chartBase()
       });
 
       destroyChart(severityChart);
@@ -1158,10 +1179,10 @@
         type: 'bar',
         data: {
           labels: Object.keys(severity),
-          datasets: [{ data: Object.values(severity), backgroundColor: [getCss('--danger'), getCss('--warning'), getCss('--accent'), getCss('--success')] }]
+          datasets: [{ data: Object.values(severity), backgroundColor: [css('--danger'), css('--warning'), css('--accent'), css('--success')], borderRadius: 10 }]
         },
         options: {
-          ...commonChartOptions(),
+          ...chartBase(),
           plugins: { legend: { display: false } }
         }
       });
@@ -1171,10 +1192,10 @@
         type: 'bar',
         data: {
           labels: Object.keys(states),
-          datasets: [{ data: Object.values(states), backgroundColor: [getCss('--accent-2'), getCss('--success'), getCss('--accent'), '#8b9bb6', getCss('--danger')] }]
+          datasets: [{ data: Object.values(states), backgroundColor: [css('--accent-2'), css('--success'), css('--accent'), '#8ea0b8', css('--danger')], borderRadius: 10 }]
         },
         options: {
-          ...commonChartOptions(),
+          ...chartBase(),
           indexAxis: 'y',
           plugins: { legend: { display: false } }
         }
@@ -1186,15 +1207,13 @@
         data: {
           labels: baseData.weekly.labels,
           datasets: [
-            { label: 'Created', data: baseData.weekly.created, backgroundColor: getCss('--accent'), borderRadius: 999, barThickness: 14 },
-            { label: 'Closed', data: baseData.weekly.closed, backgroundColor: getCss('--success'), borderRadius: 999, barThickness: 14 }
+            { label: 'Created', data: baseData.weekly.created, backgroundColor: css('--accent'), borderRadius: 999, barThickness: 14 },
+            { label: 'Closed', data: baseData.weekly.closed, backgroundColor: css('--success'), borderRadius: 999, barThickness: 14 }
           ]
         },
         options: {
-          ...commonChartOptions(),
-          plugins: {
-            legend: { display: false }
-          }
+          ...chartBase(),
+          plugins: { legend: { display: false } }
         }
       });
 
@@ -1205,7 +1224,7 @@
           labels: ['Met', 'Missed'],
           datasets: [{
             data: [kpis.met, kpis.missed],
-            backgroundColor: [getCss('--success'), colorForMissed()],
+            backgroundColor: [css('--success'), css('--missed-ring')],
             borderWidth: 0,
             hoverOffset: 0
           }]
@@ -1214,14 +1233,9 @@
           responsive: true,
           maintainAspectRatio: false,
           cutout: '78%',
-          plugins: { legend: { display: false }, tooltip: { enabled: true } }
+          plugins: { legend: { display: false } }
         }
       });
-    }
-
-    function colorForMissed() {
-      const theme = state.theme;
-      return theme === 'dark' ? '#2d3b54' : '#e7e1d8';
     }
 
     function openDrawer() {
@@ -1236,6 +1250,7 @@
 
     function setupEvents() {
       themeSelect.addEventListener('change', e => applyTheme(e.target.value));
+
       document.getElementById('applyBtn').addEventListener('click', () => {
         state.filters = {
           dateRange: dateRange.value,
@@ -1263,26 +1278,30 @@
         renderAll();
       });
 
-      ['openAiBtn', 'fabBtn'].forEach(id => document.getElementById(id).addEventListener('click', openDrawer));
+      document.getElementById('openAiBtn').addEventListener('click', openDrawer);
+      document.getElementById('fabBtn').addEventListener('click', openDrawer);
       document.getElementById('closeDrawerBtn').addEventListener('click', closeDrawer);
       document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
-      document.querySelectorAll('.prompt-chip').forEach(btn => btn.addEventListener('click', () => {
-        document.getElementById('aiPrompt').value = btn.textContent;
-      }));
+
+      document.querySelectorAll('.prompt-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('aiPrompt').value = btn.textContent;
+        });
+      });
 
       document.getElementById('generateBtn').addEventListener('click', () => {
         const prompt = document.getElementById('aiPrompt').value.trim();
         if (prompt) {
-          document.getElementById('summaryText').textContent = `Prompt received: "${prompt}". In live mode, this question would be sent with the current dashboard context. For now, the dashboard shows the most important points directly from the active filter view.`;
+          document.getElementById('summaryText').textContent = `Prompt received: “${prompt}”. In live mode, this question would be sent together with the current dashboard context. For now, the prototype keeps the answer grounded in the active filter view.`;
         }
       });
 
       document.getElementById('readBtn').addEventListener('click', () => {
         const text = document.getElementById('summaryText').textContent;
         if ('speechSynthesis' in window && text) {
-          const u = new SpeechSynthesisUtterance(text);
+          const utterance = new SpeechSynthesisUtterance(text);
           speechSynthesis.cancel();
-          speechSynthesis.speak(u);
+          speechSynthesis.speak(utterance);
         }
       });
     }
