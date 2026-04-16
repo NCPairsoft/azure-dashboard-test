@@ -84,7 +84,7 @@
     }
 
     * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; height: 100%; overflow: auto; }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
     body {
       font-family: Inter, Segoe UI, Arial, sans-serif;
       background:
@@ -92,21 +92,21 @@
         radial-gradient(circle at left bottom, rgba(157, 124, 255, 0.08), transparent 25%),
         var(--bg);
       color: var(--text);
-      min-height: 100%;
+      min-height: 100vh;
       transition: background-color 0.25s ease, color 0.25s ease;
     }
 
     .app {
-      width: 100%;
+      width: min(100%, 1620px);
       max-width: none;
       margin: 0 auto;
-      padding: 18px 20px 24px;
+      padding: 18px 14px 28px;
     }
 
     .widget-shell {
-      min-height: 100%;
-      overflow: auto;
-      padding-top: 10px;
+      min-height: 100vh;
+      overflow: visible;
+      padding-top: 14px;
     }
 
     .topbar {
@@ -431,21 +431,20 @@
     }
 
     .floating-ai-anchor {
-      position: sticky;
-      bottom: 18px;
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 10px;
-      padding-right: 8px;
+      position: static;
+      display: block;
+      margin: 0;
+      padding: 0;
       z-index: 20;
       pointer-events: none;
+      height: 0;
     }
 
     .floating-ai {
-      position: relative;
-      right: 0;
-      bottom: 0;
-      z-index: 30;
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 45;
       box-shadow: var(--shadow);
       pointer-events: auto;
       min-width: 108px;
@@ -460,6 +459,7 @@
       background: linear-gradient(180deg, var(--card), var(--card-2));
       border-left: 1px solid var(--border);
       box-shadow: -10px 0 30px rgba(0,0,0,0.18);
+      max-width: min(var(--sidebar-width), calc(100vw - 16px));
       transition: right 0.24s ease;
       z-index: 40;
       display: grid;
@@ -530,11 +530,11 @@
     }
 
     @media (max-width: 900px) {
-      .app { padding: 14px; }
+      .app { padding: 14px 10px 24px; }
       .grid-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .controls-row { grid-template-columns: 1fr; }
       .span-3, .span-4, .span-5, .span-6, .span-7, .span-8, .span-12 { grid-column: span 12; }
-      .drawer { width: min(100vw, 420px); }
+      .drawer { width: min(100vw - 8px, 420px); }
       h1 { font-size: 22px; }
     }
 
