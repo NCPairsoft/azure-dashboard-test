@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Defect Dashboard</title>
+<title>Defect Operations Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -11,92 +11,100 @@ html, body {
   padding:0;
   font-family:Segoe UI, sans-serif;
   background:#f5f3ef;
-  overflow-x:hidden;
+  overflow-x:hidden; /* remove horizontal scroll */
 }
 
-/* Container */
-.dashboard-container{
+/* container */
+.dashboard {
   max-width:1200px;
   margin:0 auto;
-  padding:20px 16px;
+  padding:20px 16px 40px; /* extra top padding */
 }
 
-/* Cards */
-.card{
+/* grid */
+.grid {
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:16px;
+}
+
+/* card */
+.card {
   background:#fff;
   border-radius:14px;
   padding:16px;
   box-shadow:0 2px 8px rgba(0,0,0,0.05);
 }
 
-/* Grid */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-  gap:16px;
+/* charts */
+canvas {
+  width:100% !important;
+  height:250px !important;
 }
 
-/* SLA Widget */
-.sla-container{
+/* SLA */
+.sla-box {
   position:relative;
-  height:220px;
+  height:260px;
 }
 
-.sla-summary{
+.sla-summary {
   position:absolute;
-  top:8px;
-  right:12px;
-  font-size:12px;
+  top:10px;
+  right:16px;
+  font-size:13px;
   text-align:right;
 }
 
-.met{color:green;font-weight:bold;}
-.missed{color:red;font-weight:bold;}
+.sla-summary .met {color:#1a7f37;font-weight:600;}
+.sla-summary .missed {color:#d9534f;font-weight:600;}
 
-.donut-wrapper{
-  height:100%;
+.sla-chart {
   display:flex;
   align-items:center;
   justify-content:center;
+  height:100%;
 }
 
-.donut-center{
+.sla-center {
   position:absolute;
-  font-size:28px;
-  font-weight:bold;
+  font-size:34px;
+  font-weight:700;
 }
 
-/* AI Drawer */
-.ai-drawer{
+/* AI drawer */
+.ai-drawer {
   position:fixed;
   right:0;
   top:0;
-  width:300px;
+  width:320px;
   height:100vh;
   background:#fff;
   box-shadow:-2px 0 10px rgba(0,0,0,0.1);
   display:none;
   flex-direction:column;
+  z-index:999;
 }
 
-.ai-content{
-  flex:1;
+.ai-content {
   display:flex;
   flex-direction:column;
-  padding:12px;
+  height:100%;
+  padding:16px;
 }
 
-.ai-input{
+.ai-input {
   margin-top:auto;
 }
 
-textarea{
+textarea {
   width:100%;
-  height:80px;
+  height:90px; /* fixed height fix */
+  resize:none;
 }
 
-/* Button */
-.ask-ai-btn{
+/* button */
+.ask-btn {
   position:fixed;
   bottom:16px;
   right:16px;
@@ -106,6 +114,7 @@ textarea{
   padding:10px 16px;
   border-radius:8px;
   cursor:pointer;
+  z-index:999;
 }
 
 </style>
@@ -113,18 +122,20 @@ textarea{
 
 <body>
 
-<div class="dashboard-container">
+<div class="dashboard">
 
 <h2>Defect Operations Dashboard</h2>
 
 <div class="grid">
 
+<!-- Trend -->
 <div class="card">
 <h3>Created vs Closed</h3>
 <canvas id="trend"></canvas>
 </div>
 
-<div class="card sla-container">
+<!-- SLA -->
+<div class="card sla-box">
 <h3>4-Week Target Compliance</h3>
 
 <div class="sla-summary">
@@ -132,9 +143,9 @@ textarea{
 <div class="missed">Missed: 18</div>
 </div>
 
-<div class="donut-wrapper">
+<div class="sla-chart">
 <canvas id="sla"></canvas>
-<div class="donut-center">65%</div>
+<div class="sla-center">65%</div>
 </div>
 
 </div>
@@ -143,53 +154,56 @@ textarea{
 
 </div>
 
-<!-- AI Drawer -->
+<!-- AI -->
 <div class="ai-drawer" id="aiDrawer">
 <div class="ai-content">
 <h3>AI Insights</h3>
 
 <div class="ai-input">
 <textarea placeholder="Ask something..."></textarea>
-<button>Generate</button>
+<br><br>
+<button>Generate Insight</button>
 </div>
 
 </div>
 </div>
 
-<button class="ask-ai-btn" onclick="toggleAI()">Ask AI</button>
+<button class="ask-btn" onclick="toggleAI()">Ask AI</button>
 
 <script>
 
-/* Charts */
-new Chart(document.getElementById('trend'),{
-type:'line',
-data:{
-labels:['Oct','Nov','Dec','Jan','Feb'],
-datasets:[
-{label:'Created',data:[10,15,20,18,14],borderColor:'blue'},
-{label:'Closed',data:[12,14,18,22,11],borderColor:'green'}
-]
-}
+/* Trend Chart */
+new Chart(document.getElementById('trend'), {
+  type:'line',
+  data:{
+    labels:['Oct','Nov','Dec','Jan','Feb'],
+    datasets:[
+      {label:'Created',data:[10,15,20,18,14],borderColor:'#007bff'},
+      {label:'Closed',data:[12,14,18,22,11],borderColor:'#28a745'}
+    ]
+  }
 });
 
-new Chart(document.getElementById('sla'),{
-type:'doughnut',
-data:{
-datasets:[{
-data:[34,18],
-backgroundColor:['green','#eee']
-}]
-},
-options:{
-cutout:'75%',
-plugins:{legend:{display:false}}
-}
+/* SLA Donut */
+new Chart(document.getElementById('sla'), {
+  type:'doughnut',
+  data:{
+    datasets:[{
+      data:[34,18],
+      backgroundColor:['#2e8b57','#e5e5e5'],
+      borderWidth:0
+    }]
+  },
+  options:{
+    cutout:'75%', /* thin ring */
+    plugins:{legend:{display:false}}
+  }
 });
 
-/* AI */
+/* AI Toggle */
 function toggleAI(){
-let el=document.getElementById('aiDrawer');
-el.style.display= el.style.display==='flex' ? 'none' : 'flex';
+  let el = document.getElementById('aiDrawer');
+  el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
 }
 
 </script>
