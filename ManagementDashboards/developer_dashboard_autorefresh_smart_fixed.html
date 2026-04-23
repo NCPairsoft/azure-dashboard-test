@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resource Allocation Management Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #eef3f9;
+      --surface: #f7fbff;
+      --surface-2: #eef5fc;
+      --card: #fbfdff;
+      --card-2: #f4f8fd;
+      --text: #1f3d63;
+      --muted: #6781a4;
+      --line: #d7e3f0;
+      --shadow: 0 10px 28px rgba(33, 65, 110, 0.08);
+      --accent: #3b82f6;
+      --accent-2: #70a8ff;
+      --success: #22a06b;
+      --danger: #e25d5d;
+      --warning: #d59a23;
+      --pill: #edf4fb;
+      --overlay: rgba(28, 52, 91, 0.18);
+      --soft-danger: #f8dede;
+      --soft-warning: #faefd5;
+      --soft-success: #dff4ea;
+      --soft-info: #deebfb;
+      --missed-ring: #e7edf5;
+    }
+
+    [data-theme="warm"] {
+      --bg: #f4efe7;
+      --surface: #fbf7f0;
+      --surface-2: #f6efe4;
+      --card: #fffaf2;
+      --card-2: #f8f1e5;
+      --text: #443225;
+      --muted: #8c745c;
+      --line: #e4d8c8;
+      --shadow: 0 10px 28px rgba(90, 67, 37, 0.08);
+      --accent: #c69424;
+      --accent-2: #8890f2;
+      --success: #23a868;
+      --danger: #db5a55;
+      --warning: #d38c00;
+      --pill: #efe3cc;
+      --overlay: rgba(43, 28, 9, 0.2);
+      --soft-danger: #f8e3de;
+      --soft-warning: #f7edd5;
+      --soft-success: #dff4e7;
+      --soft-info: #e6e7fb;
+      --missed-ring: #e6ddd3;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0e1723;
+      --surface: #121d2b;
+      --surface-2: #162233;
+      --card: #172333;
+      --card-2: #15202f;
+      --text: #ebf3ff;
+      --muted: #96aac8;
+      --line: #27374f;
+      --shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+      --accent: #f3b74c;
+      --accent-2: #7ea8ff;
+      --success: #35b97b;
+      --danger: #ff7d74;
+      --warning: #ffc14f;
+      --pill: #223149;
+      --overlay: rgba(0, 0, 0, 0.48);
+      --soft-danger: #40282c;
+      --soft-warning: #423821;
+      --soft-success: #19382c;
+      --soft-info: #1f3148;
+      --missed-ring: #2a384e;
+    }
+
+    [data-theme="blue"] {
+      --bg: #e9f0fb;
+      --surface: #f5f9ff;
+      --surface-2: #edf4ff;
+      --card: #fcfdff;
+      --card-2: #f4f8ff;
+      --text: #243f6d;
+      --muted: #6a83ad;
+      --line: #d6e2f3;
+      --shadow: 0 12px 28px rgba(41, 70, 125, 0.09);
+      --accent: #4c7dff;
+      --accent-2: #7ea8ff;
+      --success: #279c76;
+      --danger: #df6464;
+      --warning: #d9a128;
+      --pill: #e8effc;
+      --overlay: rgba(29, 54, 111, 0.18);
+      --soft-danger: #f7dfe1;
+      --soft-warning: #f7edd7;
+      --soft-success: #ddf4ea;
+      --soft-info: #dfe9ff;
+      --missed-ring: #dfe7f3;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Segoe UI, Inter, Arial, sans-serif;
+      min-height: 100%;
+      overflow-x: auto;
+      overflow-y: auto;
+    }
+
+    body { padding-top: 10px; }
+
+    .page {
+      width: 100%;
+      min-width: 1360px;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 10px 12px 110px;
+    }
+
+    .panel, .card {
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.12fr 0.88fr;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: stretch;
+    }
+
+    .panel { padding: 16px; }
+
+    .title-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--pill);
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 23px;
+      line-height: 1.15;
+    }
+
+    .subtext {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.52;
+      margin-bottom: 14px;
+    }
+
+    .meta-row, .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+      background: color-mix(in srgb, var(--card) 80%, transparent);
+      white-space: nowrap;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      align-content: start;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    select, .btn, textarea {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+    }
+
+    select {
+      padding: 12px 14px;
+      min-height: 46px;
+      outline: none;
+      width: 100%;
+    }
+
+    .actions {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 2px;
+    }
+
+    .btn {
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform .15s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn.primary {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: white;
+      border: none;
+    }
+
+    .btn.ghost {
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .helper {
+      grid-column: 1 / -1;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: -2px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .kpi-card {
+      padding: 14px;
+      min-height: 110px;
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .kpi-value {
+      font-size: 22px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .kpi-foot {
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .danger { color: var(--danger); }
+    .success { color: var(--success); }
+    .warning { color: var(--warning); }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .span-12 { grid-column: span 12; }
+    .span-8 { grid-column: span 8; }
+    .span-6 { grid-column: span 6; }
+    .span-4 { grid-column: span 4; }
+    .span-3 { grid-column: span 3; }
+
+    .card {
+      padding: 16px;
+      overflow: visible;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .card-sub {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .tag {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text);
+      background: var(--pill);
+      border: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    .chart-shell {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: color-mix(in srgb, var(--surface) 82%, transparent);
+      padding: 12px;
+      min-height: 290px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .compact-shell {
+      min-height: 250px;
+    }
+
+    .footer-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      min-width: 0;
+    }
+
+    .footer-line .pill {
+      padding: 8px 12px;
+      background: var(--pill);
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      padding-top: 4px;
+    }
+
+    .mini-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+      padding: 10px;
+      min-height: 180px;
+    }
+
+    .mini-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .mini-name {
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.3;
+    }
+
+    .mini-role {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .mini-status {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 900;
+      white-space: nowrap;
+      border: 1px solid var(--line);
+    }
+
+    .mini-status.free {
+      background: var(--soft-success);
+      color: var(--success);
+    }
+
+    .mini-status.ok {
+      background: var(--soft-info);
+      color: var(--accent);
+    }
+
+    .mini-status.risk {
+      background: var(--soft-warning);
+      color: var(--warning);
+    }
+
+    .mini-status.over {
+      background: var(--soft-danger);
+      color: var(--danger);
+    }
+
+    .mini-donut {
+      position: relative;
+      height: 92px;
+      width: 92px;
+      margin: 4px auto 10px;
+    }
+
+    .mini-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 900;
+      pointer-events: none;
+    }
+
+    .mini-metrics {
+      display: grid;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .bar-list {
+      display: grid;
+      gap: 14px;
+      padding: 8px 4px 4px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 118px 1fr 42px;
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .bar-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bar-track {
+      position: relative;
+      height: 20px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--line) 60%, transparent);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      border-radius: 999px;
+      width: 0;
+    }
+
+    .bar-value {
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: color-mix(in srgb, var(--surface) 86%, transparent);
+      max-height: 360px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th, td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      position: sticky;
+      top: 0;
+      background: color-mix(in srgb, var(--surface) 96%, transparent);
+      z-index: 2;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .util-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .heat-strip {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .heat-box {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+    }
+
+    .legend-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+    }
+
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+      z-index: 998;
+    }
+
+    .drawer-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .ai-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 320px;
+      max-width: 320px;
+      height: 100vh;
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border-left: 1px solid var(--line);
+      box-shadow: -12px 0 28px rgba(0,0,0,0.14);
+      transform: translateX(100%);
+      transition: transform .22s ease;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .ai-drawer.open { transform: translateX(0); }
+
+    .drawer-head {
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--line);
+      flex: 0 0 auto;
+    }
+
+    .drawer-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .drawer-title h3 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .icon-btn {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 12px;
+      width: 34px;
+      height: 34px;
+      cursor: pointer;
+      font-size: 16px;
+      flex: 0 0 auto;
+    }
+
+    .drawer-body {
+      padding: 12px 14px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .insight-box {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+      padding: 11px 12px;
+      overflow: hidden;
+    }
+
+    .insight-head {
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .insight-text {
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .prompt-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .prompt-chip {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 9px 11px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 800;
+      width: 100%;
+    }
+
+    .drawer-foot {
+      padding: 12px 14px 14px;
+      border-top: 1px solid var(--line);
+      background: color-mix(in srgb, var(--card) 90%, transparent);
+      flex: 0 0 auto;
+      overflow: hidden;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 78px;
+      max-height: 78px;
+      padding: 11px 12px;
+      resize: none;
+      outline: none;
+      overflow: auto;
+    }
+
+    .drawer-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mini-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .fab {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 997;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 18px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: white;
+      font-weight: 900;
+      box-shadow: 0 12px 26px rgba(0,0,0,0.15);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="page">
+    <section class="hero-grid">
+      <div class="panel">
+        <div class="title-badge">Management View • Resource Visibility</div>
+        <h1>Resource Allocation & Capacity Command Center</h1>
+        <div class="subtext">
+          Single-page management dashboard focused on project-wise allocation, overall utilization, short-term availability, overload risk, and weekly resource pulse. Built on the same visual language as your current dashboard so leadership can review resource health without changing usage habits.
+        </div>
+        <div class="meta-row" id="metaRow"></div>
+        <div class="chip-row" style="margin-top:10px;">
+          <div class="chip">4 themes enabled</div>
+          <div class="chip">Project-wise + overall lens</div>
+          <div class="chip">Weekly visibility + AI insights</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="filters">
+          <div class="field">
+            <label>Planning Window</label>
+            <select id="windowFilter">
+              <option value="Current Week">Current Week</option>
+              <option value="Next 2 Weeks">Next 2 Weeks</option>
+              <option value="Current Sprint">Current Sprint</option>
+              <option value="This Month">This Month</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Theme</label>
+            <select id="themeSelect">
+              <option value="light">Light Professional</option>
+              <option value="warm">Warm BI</option>
+              <option value="dark">Dark Classic</option>
+              <option value="blue">Blue Executive</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Project</label>
+            <select id="projectFilter"></select>
+          </div>
+          <div class="field">
+            <label>Team</label>
+            <select id="teamFilter"></select>
+          </div>
+          <div class="field">
+            <label>Manager</label>
+            <select id="managerFilter"></select>
+          </div>
+          <div class="field">
+            <label>Utilization Band</label>
+            <select id="utilFilter">
+              <option>All</option>
+              <option>Available (&lt;70%)</option>
+              <option>Healthy (70-90%)</option>
+              <option>High (91-100%)</option>
+              <option>Overallocated (&gt;100%)</option>
+            </select>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="applyBtn">Apply Filters</button>
+            <button class="btn ghost" id="resetBtn">Reset</button>
+            <button class="btn ghost" id="openAiBtn">Open AI Insights</button>
+          </div>
+          <div class="helper">Demo data is built in. Replace the dataset object later with API/DB-fed JSON from your Azure sync pipeline.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="kpi-grid" id="kpiGrid"></section>
+
+    <section class="main-grid">
+      <article class="card span-8">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Allocation vs Capacity by Project</div>
+            <div class="card-sub">Compares available hours, allocated hours, and approved buffer to quickly spot overload or unused capacity.</div>
+          </div>
+          <div class="tag">Projects</div>
+        </div>
+        <div class="chart-shell"><canvas id="projectCapacityChart"></canvas></div>
+        <div class="footer-line"><span id="projectCapFoot"></span><span class="pill">Selected filter view</span></div>
+      </article>
+
+      <article class="card span-4">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Utilization Distribution</div>
+            <div class="card-sub">Management view of current resource mix by utilization band.</div>
+          </div>
+          <div class="tag">Mix</div>
+        </div>
+        <div class="chart-shell compact-shell"><canvas id="utilMixChart"></canvas></div>
+        <div class="footer-line"><span id="utilMixFoot"></span><span class="pill">Band view</span></div>
+      </article>
+
+      <article class="card span-4">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Team Utilization</div>
+            <div class="card-sub">Average allocation pressure across delivery teams.</div>
+          </div>
+          <div class="tag">Teams</div>
+        </div>
+        <div class="chart-shell compact-shell"><canvas id="teamUtilChart"></canvas></div>
+        <div class="footer-line"><span id="teamUtilFoot"></span><span class="pill">Average utilization %</span></div>
+      </article>
+
+      <article class="card span-4">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Near-Term Availability</div>
+            <div class="card-sub">Free capacity by team for immediate movement or urgent work.</div>
+          </div>
+          <div class="tag">Bench</div>
+        </div>
+        <div class="chart-shell compact-shell" style="display:flex; align-items:center;">
+          <div class="bar-list" id="availabilityBars" style="width:100%;"></div>
+        </div>
+        <div class="footer-line"><span id="availabilityFoot"></span><span class="pill">Hours free</span></div>
+      </article>
+
+      <article class="card span-4">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Overload Risk by Project</div>
+            <div class="card-sub">Projects carrying the highest overallocation pressure.</div>
+          </div>
+          <div class="tag">Risk</div>
+        </div>
+        <div class="chart-shell compact-shell"><canvas id="riskProjectChart"></canvas></div>
+        <div class="footer-line"><span id="riskProjectFoot"></span><span class="pill">Overallocated hours</span></div>
+      </article>
+
+      <article class="card span-12">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Weekly Resource Pulse</div>
+            <div class="card-sub">Compact daily/weekly view to help management track who is free, balanced, stressed, or overallocated without opening detailed reports.</div>
+          </div>
+          <div class="tag">Pulse</div>
+        </div>
+        <div class="mini-grid" id="miniGrid"></div>
+        <div class="legend-row">
+          <div class="legend-item"><span class="legend-dot" style="background:var(--success)"></span>Available / underutilized</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--accent)"></span>Healthy utilization</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--warning)"></span>High utilization</div>
+          <div class="legend-item"><span class="legend-dot" style="background:var(--danger)"></span>Overallocated</div>
+        </div>
+      </article>
+
+      <article class="card span-6">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Resource Allocation Table</div>
+            <div class="card-sub">Action table for management review covering capacity, allocation, availability, billability, and risk signals.</div>
+          </div>
+          <div class="tag">Resources</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Resource</th>
+                <th>Team</th>
+                <th>Project</th>
+                <th>Util%</th>
+                <th>Avail Hrs</th>
+                <th>Billable%</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="resourceTable"></tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card span-6">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Project Attention Matrix</div>
+            <div class="card-sub">One-row summary per project showing people count, average utilization, free hours, overload hours, and delivery risk heat.</div>
+          </div>
+          <div class="tag">Attention</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>People</th>
+                <th>Avg Util%</th>
+                <th>Free Hrs</th>
+                <th>Over Hrs</th>
+                <th>Heat</th>
+              </tr>
+            </thead>
+            <tbody id="projectTable"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+
+  <aside class="ai-drawer" id="aiDrawer">
+    <div class="drawer-head">
+      <div class="drawer-title">
+        <h3>AI Insights</h3>
+        <button class="icon-btn" id="closeDrawerBtn">×</button>
+      </div>
+      <div class="subtext" style="margin:0; font-size:12px;">Summarizes resource health from the active filter view.</div>
+    </div>
+
+    <div class="drawer-body">
+      <div class="insight-box">
+        <div class="insight-head">Executive Summary</div>
+        <div class="insight-text" id="summaryText"></div>
+      </div>
+      <div class="insight-box">
+        <div class="insight-head">Capacity Risks</div>
+        <div class="insight-text" id="riskText"></div>
+      </div>
+      <div class="insight-box">
+        <div class="insight-head">Recommended Actions</div>
+        <div class="insight-text" id="actionText"></div>
+      </div>
+      <div class="insight-box">
+        <div class="insight-head">Quick Prompts</div>
+        <div class="prompt-grid">
+          <button class="prompt-chip">Which project is most overloaded?</button>
+          <button class="prompt-chip">Who is available for a new urgent task?</button>
+          <button class="prompt-chip">Summarize utilization by team</button>
+          <button class="prompt-chip">Where should management rebalance resources?</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-foot">
+      <textarea id="aiPrompt" placeholder="Ask something like: Which team has free capacity, or who is overloaded?"></textarea>
+      <div class="drawer-actions">
+        <button class="btn primary" id="generateBtn">Generate Insight</button>
+        <button class="btn ghost" id="readBtn">Read Aloud</button>
+      </div>
+      <div class="mini-note">In live mode, this drawer can post filter context and summary metrics to your AI backend endpoint.</div>
+    </div>
+  </aside>
+
+  <button class="fab" id="fabBtn">Ask AI</button>
+
+  <script>
+    const baseData = {
+      resources: [
+        { name: 'Aman', role: 'Backend Dev', team: 'Core Platform', manager: 'Nitin', project: 'PaperSave', capacity: 40, allocated: 44, billable: 95, utilization: 110, freeHours: 0, overHours: 4, skill: '.NET / APIs', week:[92,98,104,110,108], daily:[85,92,110,112,118] },
+        { name: 'Pooja', role: 'QA Lead', team: 'Quality', manager: 'Nitin', project: 'PaperSave', capacity: 40, allocated: 34, billable: 82, utilization: 85, freeHours: 6, overHours: 0, skill: 'QA / Test Ops', week:[80,82,85,88,85], daily:[70,78,84,89,86] },
+        { name: 'Rakesh', role: 'Angular Dev', team: 'UI Experience', manager: 'Madhuri', project: 'PairSoft Platform', capacity: 40, allocated: 38, billable: 88, utilization: 95, freeHours: 2, overHours: 0, skill: 'Angular / UX', week:[74,81,86,93,95], daily:[78,84,91,96,98] },
+        { name: 'Neha', role: 'Business Analyst', team: 'Delivery Ops', manager: 'Madhuri', project: 'Webiplex', capacity: 40, allocated: 26, billable: 68, utilization: 65, freeHours: 14, overHours: 0, skill: 'BA / Process', week:[58,60,62,64,65], daily:[55,58,62,67,65] },
+        { name: 'Vikas', role: 'Data Engineer', team: 'Core Platform', manager: 'Nitin', project: 'PaperSave Agile', capacity: 40, allocated: 42, billable: 91, utilization: 105, freeHours: 0, overHours: 2, skill: 'ETL / SQL', week:[88,94,101,106,105], daily:[84,96,101,108,106] },
+        { name: 'Shweta', role: 'UI Dev', team: 'UI Experience', manager: 'Madhuri', project: 'Webiplex', capacity: 40, allocated: 28, billable: 72, utilization: 70, freeHours: 12, overHours: 0, skill: 'UI / CSS', week:[60,64,68,69,70], daily:[58,62,70,71,69] },
+        { name: 'Imran', role: 'DevOps', team: 'Infrastructure', manager: 'Karan', project: 'PairSoft Platform', capacity: 40, allocated: 31, billable: 76, utilization: 78, freeHours: 9, overHours: 0, skill: 'Azure / CI-CD', week:[66,70,74,77,78], daily:[69,74,80,78,76] },
+        { name: 'Sneha', role: 'QA Engineer', team: 'Quality', manager: 'Karan', project: 'PaperSave Agile', capacity: 40, allocated: 24, billable: 55, utilization: 60, freeHours: 16, overHours: 0, skill: 'Regression QA', week:[52,55,56,58,60], daily:[48,54,59,61,60] },
+        { name: 'Harsh', role: 'Backend Dev', team: 'Core Platform', manager: 'Nitin', project: 'PairSoft Platform', capacity: 40, allocated: 36, billable: 85, utilization: 90, freeHours: 4, overHours: 0, skill: '.NET / Services', week:[80,84,88,89,90], daily:[76,82,88,91,90] },
+        { name: 'Priya', role: 'Support Engineer', team: 'Delivery Ops', manager: 'Karan', project: 'Support Desk', capacity: 40, allocated: 22, billable: 50, utilization: 55, freeHours: 18, overHours: 0, skill: 'Support / Ops', week:[50,52,54,56,55], daily:[48,53,57,56,54] },
+        { name: 'Ajay', role: 'QA Automation', team: 'Quality', manager: 'Nitin', project: 'Support Desk', capacity: 40, allocated: 41, billable: 94, utilization: 103, freeHours: 0, overHours: 1, skill: 'Automation QA', week:[88,94,98,102,103], daily:[86,95,101,104,103] },
+        { name: 'Komal', role: 'Designer', team: 'UI Experience', manager: 'Madhuri', project: 'PaperSave', capacity: 40, allocated: 20, billable: 48, utilization: 50, freeHours: 20, overHours: 0, skill: 'Design / Product', week:[44,47,49,51,50], daily:[42,46,50,52,50] }
+      ]
+    };
+
+    const state = {
+      theme: localStorage.getItem('resource_dashboard_theme') || 'light',
+      filters: {
+        planningWindow: 'Current Week',
+        project: 'All Projects',
+        team: 'All Teams',
+        manager: 'All Managers',
+        utilBand: 'All'
+      }
+    };
+
+    let projectCapacityChart, utilMixChart, teamUtilChart, riskProjectChart;
+    const miniCharts = {};
+
+    const body = document.body;
+    const themeSelect = document.getElementById('themeSelect');
+    const windowFilter = document.getElementById('windowFilter');
+    const projectFilter = document.getElementById('projectFilter');
+    const teamFilter = document.getElementById('teamFilter');
+    const managerFilter = document.getElementById('managerFilter');
+    const utilFilter = document.getElementById('utilFilter');
+    const metaRow = document.getElementById('metaRow');
+    const kpiGrid = document.getElementById('kpiGrid');
+    const availabilityBars = document.getElementById('availabilityBars');
+    const miniGrid = document.getElementById('miniGrid');
+    const resourceTable = document.getElementById('resourceTable');
+    const projectTable = document.getElementById('projectTable');
+
+    function css(name) {
+      return getComputedStyle(document.body).getPropertyValue(name).trim();
+    }
+
+    function buildOptions(el, items) {
+      el.innerHTML = items.map(v => `<option>${v}</option>`).join('');
+    }
+
+    function applyTheme(theme) {
+      state.theme = theme;
+      body.setAttribute('data-theme', theme);
+      localStorage.setItem('resource_dashboard_theme', theme);
+      renderAll();
+    }
+
+    function initFilters() {
+      buildOptions(projectFilter, ['All Projects', ...new Set(baseData.resources.map(r => r.project))]);
+      buildOptions(teamFilter, ['All Teams', ...new Set(baseData.resources.map(r => r.team))]);
+      buildOptions(managerFilter, ['All Managers', ...new Set(baseData.resources.map(r => r.manager))]);
+      themeSelect.value = state.theme;
+      applyTheme(state.theme);
+    }
+
+    function inUtilBand(util, band) {
+      if (band === 'All') return true;
+      if (band === 'Available (<70%)') return util < 70;
+      if (band === 'Healthy (70-90%)') return util >= 70 && util <= 90;
+      if (band === 'High (91-100%)') return util > 90 && util <= 100;
+      if (band === 'Overallocated (>100%)') return util > 100;
+      return true;
+    }
+
+    function getFilteredResources() {
+      return baseData.resources.filter(r => {
+        if (state.filters.project !== 'All Projects' && r.project !== state.filters.project) return false;
+        if (state.filters.team !== 'All Teams' && r.team !== state.filters.team) return false;
+        if (state.filters.manager !== 'All Managers' && r.manager !== state.filters.manager) return false;
+        if (!inUtilBand(r.utilization, state.filters.utilBand)) return false;
+        return true;
+      });
+    }
+
+    function utilizationBand(util) {
+      if (util > 100) return 'Overallocated';
+      if (util > 90) return 'High';
+      if (util >= 70) return 'Healthy';
+      return 'Available';
+    }
+
+    function statusClass(util) {
+      if (util > 100) return 'over';
+      if (util > 90) return 'risk';
+      if (util >= 70) return 'ok';
+      return 'free';
+    }
+
+    function summarize(resources) {
+      const totalCapacity = resources.reduce((s, r) => s + r.capacity, 0);
+      const totalAllocated = resources.reduce((s, r) => s + r.allocated, 0);
+      const freeHours = resources.reduce((s, r) => s + r.freeHours, 0);
+      const overHours = resources.reduce((s, r) => s + r.overHours, 0);
+      const billableAvg = resources.length ? resources.reduce((s, r) => s + r.billable, 0) / resources.length : 0;
+      const utilAvg = resources.length ? resources.reduce((s, r) => s + r.utilization, 0) / resources.length : 0;
+      const availableCount = resources.filter(r => r.utilization < 70).length;
+      const overCount = resources.filter(r => r.utilization > 100).length;
+      const healthyCount = resources.filter(r => r.utilization >= 70 && r.utilization <= 90).length;
+      const highCount = resources.filter(r => r.utilization > 90 && r.utilization <= 100).length;
+      return { totalCapacity, totalAllocated, freeHours, overHours, billableAvg, utilAvg, availableCount, overCount, healthyCount, highCount };
+    }
+
+    function byProject(resources) {
+      const map = {};
+      resources.forEach(r => {
+        if (!map[r.project]) {
+          map[r.project] = { project: r.project, people: 0, capacity: 0, allocated: 0, freeHours: 0, overHours: 0, utilTotal: 0 };
+        }
+        const p = map[r.project];
+        p.people += 1;
+        p.capacity += r.capacity;
+        p.allocated += r.allocated;
+        p.freeHours += r.freeHours;
+        p.overHours += r.overHours;
+        p.utilTotal += r.utilization;
+      });
+      return Object.values(map).map(p => ({ ...p, avgUtil: p.people ? p.utilTotal / p.people : 0 }));
+    }
+
+    function byTeam(resources) {
+      const map = {};
+      resources.forEach(r => {
+        if (!map[r.team]) {
+          map[r.team] = { team: r.team, people: 0, freeHours: 0, utilTotal: 0 };
+        }
+        const t = map[r.team];
+        t.people += 1;
+        t.freeHours += r.freeHours;
+        t.utilTotal += r.utilization;
+      });
+      return Object.values(map).map(t => ({ ...t, avgUtil: t.people ? t.utilTotal / t.people : 0 }));
+    }
+
+    function renderMeta(resources, sum) {
+      const now = new Date();
+      metaRow.innerHTML = `
+        <div class="chip">Filters: ${state.filters.project} • ${state.filters.team} • ${state.filters.planningWindow}</div>
+        <div class="chip">Resources in view: ${resources.length}</div>
+        <div class="chip">Avg utilization: ${sum.utilAvg.toFixed(1)}%</div>
+        <div class="chip">Last refreshed: ${now.toLocaleDateString()} ${now.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}</div>
+      `;
+    }
+
+    function renderKpis(sum, resources, projects) {
+      const items = [
+        ['Resources in View', resources.length, `${projects.length} project(s) covered`, 'warning'],
+        ['Total Capacity', `${sum.totalCapacity}h`, `${sum.totalAllocated}h allocated`, 'success'],
+        ['Avg Utilization', `${sum.utilAvg.toFixed(1)}%`, sum.utilAvg > 95 ? 'Capacity pressure building' : 'Within reasonable range', sum.utilAvg > 95 ? 'danger' : 'success'],
+        ['Free Capacity', `${sum.freeHours}h`, `${sum.availableCount} people available`, 'success'],
+        ['Overallocated Load', `${sum.overHours}h`, `${sum.overCount} people above 100%`, sum.overCount ? 'danger' : 'success'],
+        ['Billable Mix', `${sum.billableAvg.toFixed(1)}%`, 'Average across visible resources', 'warning'],
+        ['High Pressure Count', `${sum.highCount + sum.overCount}`, `${sum.highCount} high + ${sum.overCount} over`, (sum.highCount + sum.overCount) ? 'warning' : 'success']
+      ];
+      kpiGrid.innerHTML = items.map(([label, value, foot, cls]) => `
+        <div class="card kpi-card">
+          <div class="kpi-label">${label}</div>
+          <div class="kpi-value">${value}</div>
+          <div class="kpi-foot ${cls}">${foot}</div>
+        </div>
+      `).join('');
+    }
+
+    function chartBase() {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              color: css('--muted'),
+              boxWidth: 10,
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: css('--muted') }, grid: { color: 'transparent' } },
+          y: { ticks: { color: css('--muted') }, grid: { color: css('--line') } }
+        }
+      };
+    }
+
+    function destroyChart(chart) {
+      if (chart) chart.destroy();
+    }
+
+    function renderCharts(resources, projects, teams, sum) {
+      destroyChart(projectCapacityChart);
+      projectCapacityChart = new Chart(document.getElementById('projectCapacityChart'), {
+        type: 'bar',
+        data: {
+          labels: projects.map(p => p.project),
+          datasets: [
+            { label: 'Capacity', data: projects.map(p => p.capacity), backgroundColor: css('--soft-info'), borderRadius: 10 },
+            { label: 'Allocated', data: projects.map(p => p.allocated), backgroundColor: css('--accent'), borderRadius: 10 },
+            { label: 'Free', data: projects.map(p => p.freeHours), backgroundColor: css('--success'), borderRadius: 10 }
+          ]
+        },
+        options: chartBase()
+      });
+      document.getElementById('projectCapFoot').textContent = projects.length ? `Highest allocation: ${projects.slice().sort((a,b) => b.allocated - a.allocated)[0].project}` : 'No projects in current view';
+
+      destroyChart(utilMixChart);
+      utilMixChart = new Chart(document.getElementById('utilMixChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Available', 'Healthy', 'High', 'Overallocated'],
+          datasets: [{
+            data: [sum.availableCount, sum.healthyCount, sum.highCount, sum.overCount],
+            backgroundColor: [css('--success'), css('--accent'), css('--warning'), css('--danger')],
+            borderWidth: 0,
+            hoverOffset: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '68%',
+          plugins: { legend: { position: 'bottom', labels: { color: css('--muted'), usePointStyle: true, pointStyle: 'circle' } } }
+        }
+      });
+      document.getElementById('utilMixFoot').textContent = `${sum.availableCount} available • ${sum.overCount} overallocated`;
+
+      destroyChart(teamUtilChart);
+      teamUtilChart = new Chart(document.getElementById('teamUtilChart'), {
+        type: 'bar',
+        data: {
+          labels: teams.map(t => t.team),
+          datasets: [{
+            data: teams.map(t => Number(t.avgUtil.toFixed(1))),
+            backgroundColor: teams.map(t => t.avgUtil > 100 ? css('--danger') : t.avgUtil > 90 ? css('--warning') : t.avgUtil < 70 ? css('--success') : css('--accent')),
+            borderRadius: 10
+          }]
+        },
+        options: { ...chartBase(), plugins: { legend: { display: false } } }
+      });
+      document.getElementById('teamUtilFoot').textContent = teams.length ? `Highest team load: ${teams.slice().sort((a,b)=>b.avgUtil-a.avgUtil)[0].team}` : 'No team data';
+
+      destroyChart(riskProjectChart);
+      const riskProjects = projects.slice().sort((a,b) => b.overHours - a.overHours).slice(0, 6);
+      riskProjectChart = new Chart(document.getElementById('riskProjectChart'), {
+        type: 'bar',
+        data: {
+          labels: riskProjects.map(p => p.project),
+          datasets: [{
+            data: riskProjects.map(p => p.overHours),
+            backgroundColor: css('--danger'),
+            borderRadius: 999,
+            barThickness: 16
+          }]
+        },
+        options: { ...chartBase(), indexAxis: 'y', plugins: { legend: { display: false } } }
+      });
+      document.getElementById('riskProjectFoot').textContent = riskProjects.length ? `Top risk: ${riskProjects[0].project}` : 'No overload detected';
+    }
+
+    function renderAvailabilityBars(teams) {
+      const max = Math.max(...teams.map(t => t.freeHours), 1);
+      availabilityBars.innerHTML = teams.map((t, i) => `
+        <div class="bar-row">
+          <div class="bar-label">${t.team}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(t.freeHours / max) * 100}%; background:${i % 2 === 0 ? css('--success') : css('--accent-2')};"></div></div>
+          <div class="bar-value">${t.freeHours}</div>
+        </div>
+      `).join('');
+      document.getElementById('availabilityFoot').textContent = teams.length ? `Most available: ${teams.slice().sort((a,b)=>b.freeHours-a.freeHours)[0].team}` : 'No availability data';
+    }
+
+    function renderMiniGrid(resources) {
+      miniGrid.innerHTML = resources.slice(0, 8).map((r, index) => `
+        <div class="mini-card">
+          <div class="mini-head">
+            <div>
+              <div class="mini-name">${r.name}</div>
+              <div class="mini-role">${r.role}</div>
+            </div>
+            <div class="mini-status ${statusClass(r.utilization)}">${utilizationBand(r.utilization)}</div>
+          </div>
+          <div class="mini-donut">
+            <canvas id="miniChart${index}"></canvas>
+            <div class="mini-center">${r.utilization}%</div>
+          </div>
+          <div class="mini-metrics">
+            <div class="metric-row"><span>Project</span><strong>${r.project}</strong></div>
+            <div class="metric-row"><span>Free</span><strong>${r.freeHours}h</strong></div>
+            <div class="metric-row"><span>Billable</span><strong>${r.billable}%</strong></div>
+            <div class="metric-row"><span>Skill</span><strong>${r.skill}</strong></div>
+          </div>
+        </div>
+      `).join('');
+
+      Object.values(miniCharts).forEach(ch => ch && ch.destroy());
+
+      resources.slice(0, 8).forEach((r, index) => {
+        const free = Math.max(0, 100 - Math.min(100, r.utilization));
+        const danger = Math.max(0, r.utilization - 100);
+        const active = Math.min(100, r.utilization);
+        miniCharts[`miniChart${index}`] = new Chart(document.getElementById(`miniChart${index}`), {
+          type: 'doughnut',
+          data: {
+            labels: ['Used', 'Free', 'Over'],
+            datasets: [{
+              data: [active, free, danger],
+              backgroundColor: [r.utilization > 100 ? css('--warning') : r.utilization >= 70 ? css('--accent') : css('--success'), css('--missed-ring'), css('--danger')],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '76%',
+            plugins: { legend: { display: false } }
+          }
+        });
+      });
+    }
+
+    function utilPill(util) {
+      const cls = statusClass(util);
+      const label = utilizationBand(util);
+      return `<span class="util-pill ${cls === 'over' ? 'danger' : cls === 'risk' ? 'warning' : cls === 'ok' ? 'success' : 'success'}">${label}</span>`;
+    }
+
+    function renderResourceTable(resources) {
+      resourceTable.innerHTML = resources.slice().sort((a,b)=>b.utilization-a.utilization).map(r => `
+        <tr>
+          <td><strong>${r.name}</strong><br><span style="color:var(--muted); font-size:11px;">${r.role}</span></td>
+          <td>${r.team}</td>
+          <td>${r.project}</td>
+          <td>${r.utilization}%</td>
+          <td>${r.freeHours}h</td>
+          <td>${r.billable}%</td>
+          <td>${utilPill(r.utilization)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function heatBoxes(avgUtil, freeHours, overHours) {
+      const colors = [];
+      colors.push(avgUtil > 100 ? css('--danger') : avgUtil > 90 ? css('--warning') : avgUtil < 70 ? css('--success') : css('--accent'));
+      colors.push(freeHours > 20 ? css('--success') : freeHours > 8 ? css('--accent') : css('--warning'));
+      colors.push(overHours > 0 ? css('--danger') : css('--success'));
+      colors.push(avgUtil > 95 && overHours > 0 ? css('--danger') : css('--soft-info'));
+      return `<div class="heat-strip">${colors.map(c => `<span class="heat-box" style="background:${c}"></span>`).join('')}</div>`;
+    }
+
+    function renderProjectTable(projects) {
+      projectTable.innerHTML = projects.slice().sort((a,b)=> (b.overHours + b.avgUtil) - (a.overHours + a.avgUtil)).map(p => `
+        <tr>
+          <td><strong>${p.project}</strong></td>
+          <td>${p.people}</td>
+          <td>${p.avgUtil.toFixed(1)}%</td>
+          <td>${p.freeHours}h</td>
+          <td>${p.overHours}h</td>
+          <td>${heatBoxes(p.avgUtil, p.freeHours, p.overHours)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function buildAiText(resources, sum, projects, teams) {
+      const topOverloaded = resources.slice().sort((a,b)=>b.utilization-a.utilization)[0];
+      const mostAvailable = resources.slice().sort((a,b)=>b.freeHours-a.freeHours)[0];
+      const riskiestProject = projects.slice().sort((a,b)=>b.overHours-a.overHours)[0];
+      const healthiestTeam = teams.slice().sort((a,b)=>b.freeHours-a.freeHours)[0];
+
+      document.getElementById('summaryText').textContent =
+        `Current view covers ${resources.length} resource(s) across ${projects.length} project(s). Average utilization is ${sum.utilAvg.toFixed(1)}%, with ${sum.freeHours} free hours visible and ${sum.overHours} overload hours needing attention.`;
+
+      document.getElementById('riskText').textContent =
+        `${topOverloaded ? topOverloaded.name + ' is the most stretched at ' + topOverloaded.utilization + '% utilization. ' : ''}` +
+        `${riskiestProject ? riskiestProject.project + ' carries the highest project-level overload at ' + riskiestProject.overHours + ' extra hours. ' : ''}` +
+        `${sum.overCount} resource(s) are above 100%, while ${sum.highCount} more are close to the threshold.`;
+
+      document.getElementById('actionText').textContent =
+        `${mostAvailable ? 'Consider moving work toward ' + mostAvailable.name + ' who has ' + mostAvailable.freeHours + ' free hours. ' : ''}` +
+        `${healthiestTeam ? healthiestTeam.team + ' appears to have the strongest near-term availability. ' : ''}` +
+        `Management should review overloaded allocations first, then rebalance work from high-pressure projects to teams with free hours before adding new commitments.`;
+    }
+
+    function renderAll() {
+      const resources = getFilteredResources();
+      const projects = byProject(resources);
+      const teams = byTeam(resources);
+      const sum = summarize(resources);
+
+      renderMeta(resources, sum);
+      renderKpis(sum, resources, projects);
+      renderCharts(resources, projects, teams, sum);
+      renderAvailabilityBars(teams);
+      renderMiniGrid(resources);
+      renderResourceTable(resources);
+      renderProjectTable(projects);
+      buildAiText(resources, sum, projects, teams);
+    }
+
+    function openDrawer() {
+      document.getElementById('aiDrawer').classList.add('open');
+      document.getElementById('drawerOverlay').classList.add('show');
+    }
+
+    function closeDrawer() {
+      document.getElementById('aiDrawer').classList.remove('open');
+      document.getElementById('drawerOverlay').classList.remove('show');
+    }
+
+    function setupEvents() {
+      themeSelect.addEventListener('change', e => applyTheme(e.target.value));
+
+      document.getElementById('applyBtn').addEventListener('click', () => {
+        state.filters = {
+          planningWindow: windowFilter.value,
+          project: projectFilter.value,
+          team: teamFilter.value,
+          manager: managerFilter.value,
+          utilBand: utilFilter.value
+        };
+        renderAll();
+      });
+
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        windowFilter.value = 'Current Week';
+        projectFilter.value = 'All Projects';
+        teamFilter.value = 'All Teams';
+        managerFilter.value = 'All Managers';
+        utilFilter.value = 'All';
+        state.filters = {
+          planningWindow: 'Current Week',
+          project: 'All Projects',
+          team: 'All Teams',
+          manager: 'All Managers',
+          utilBand: 'All'
+        };
+        renderAll();
+      });
+
+      document.getElementById('openAiBtn').addEventListener('click', openDrawer);
+      document.getElementById('fabBtn').addEventListener('click', openDrawer);
+      document.getElementById('closeDrawerBtn').addEventListener('click', closeDrawer);
+      document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
+
+      document.querySelectorAll('.prompt-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('aiPrompt').value = btn.textContent;
+        });
+      });
+
+      document.getElementById('generateBtn').addEventListener('click', () => {
+        const prompt = document.getElementById('aiPrompt').value.trim();
+        if (prompt) {
+          document.getElementById('summaryText').textContent =
+            `Prompt received: “${prompt}”. In live mode, the dashboard can post the active filter view, resource summary, and project metrics to your AI service so the answer stays grounded in current allocation data.`;
+        }
+      });
+
+      document.getElementById('readBtn').addEventListener('click', () => {
+        const text = document.getElementById('summaryText').textContent;
+        if ('speechSynthesis' in window && text) {
+          const utterance = new SpeechSynthesisUtterance(text);
+          speechSynthesis.cancel();
+          speechSynthesis.speak(utterance);
+        }
+      });
+    }
+
+    initFilters();
+    setupEvents();
+    renderAll();
+  </script>
+</body>
+</html>
